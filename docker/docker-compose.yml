@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  composer:
+    image: composer:1.10
+    volumes:
+    - "../:/app"
+
+  app:
+    build:
+      context: ..
+      dockerfile: ./docker/app.Dockerfile
+    depends_on:
+      - composer
+    volumes:
+    - "../:/app"
+
+networks:
+  default:
