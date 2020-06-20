@@ -9,11 +9,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Lint
-        run: make lint
+      - name: Validate composer.json, composer.lock
+        run: make composer-validate
 
       - name: Build
         run: make build
 
-#      - name: Test
-#        run: make test
+      - name: Lint
+        run: make phpcs
+
+      - name: Test
+        run: make phpunit

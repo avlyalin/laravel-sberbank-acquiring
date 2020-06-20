@@ -39,7 +39,7 @@
         }
     },
     "scripts": {
-        "hooks": [
+        "add-hooks": [
             "./vendor/bin/cghooks add"
         ],
         "code-sniffer": [
@@ -48,20 +48,20 @@
         ],
         "post-install-cmd": [
             "@code-sniffer",
-            "@hooks"
+            "@add-hooks"
         ],
         "post-update-cmd": [
-            "@code-sniffer",
-            "@hooks"
+            "@code-sniffer"
         ]
     },
     "extra": {
         "hooks": {
             "pre-commit": [
-                "make lint"
+                "make composer-validate",
+                "make phpcs"
             ],
             "pre-push": [
-                "make test"
+                "make phpunit"
             ]
         }
     }

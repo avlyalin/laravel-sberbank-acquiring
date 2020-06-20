@@ -6,11 +6,7 @@ APP := docker-compose -f $(DOCKER_COMPOSE_FILE) run -u $(CURRENT_USER):$(CURRENT
 
 .DEFAULT_GOAL = build
 
-lint: composer-validate phpcs
-
 build: docker-build composer-install
-
-test: phpunit
 
 docker-build:
 	docker-compose -f $(DOCKER_COMPOSE_FILE) build
