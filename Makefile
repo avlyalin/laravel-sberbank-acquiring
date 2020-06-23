@@ -24,13 +24,13 @@ composer-require-dev:
 	$(COMPOSER) require --dev
 
 composer-validate:
-	$(COMPOSER) validate
+	$(COMPOSER) validate composer.json
 
 composer:
 	$(COMPOSER) $(args)
 
 phpunit:
-	$(APP) ./vendor/bin/phpunit --colors
+	$(APP) ./vendor/bin/phpunit
 
 phpcs:
 	$(APP) ./vendor/bin/phpcs
