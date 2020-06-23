@@ -19,8 +19,7 @@
     ],
     "require": {
         "php": "^7.2",
-        "guzzlehttp/guzzle": "^6.5",
-        "laravel/laravel": "^5.8"
+        "guzzlehttp/guzzle": "^6.5"
     },
     "require-dev": {
         "orchestra/testbench": "^3.8|^4.0|^5.0",
