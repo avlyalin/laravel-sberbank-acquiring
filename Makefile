@@ -30,7 +30,7 @@ composer:
 	$(COMPOSER) $(args)
 
 phpunit:
-	$(APP) ./vendor/bin/phpunit
+	$(APP) ./vendor/bin/phpunit $(args)
 
 phpcs:
 	$(APP) ./vendor/bin/phpcs

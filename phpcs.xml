@@ -6,6 +6,10 @@
 
     <rule ref="PSR12"/>
 
+    <rule ref="Squiz.Operators.ComparisonOperatorUsage">
+        <exclude name="Squiz.Operators.ComparisonOperatorUsage.ImplicitTrue"/>
+    </rule>
+
     <rule ref="PSR1">
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
     </rule>
