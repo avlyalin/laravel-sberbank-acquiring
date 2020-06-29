@@ -5,25 +5,11 @@ declare(strict_types=1);
 namespace Avlyalin\SberbankAcquiring\Client;
 
 use Avlyalin\SberbankAcquiring\Client\Curl\CurlInterface;
-use Avlyalin\SberbankAcquiring\Exceptions\ClientException;
+use Avlyalin\SberbankAcquiring\Exceptions\HttpClientException;
+use Avlyalin\SberbankAcquiring\Exceptions\NetworkException;
 
-class HttpClient
+class HttpClient implements HttpClientInterface
 {
-
-    /**
-     * HTTP GET
-     *
-     * @var string
-     */
-    public const METHOD_GET = 'GET';
-
-    /**
-     * HTTP POST
-     *
-     * @var string
-     */
-    public const METHOD_POST = 'POST';
-
     /**
      * @var CurlInterface
      */
@@ -52,34 +38,37 @@ class HttpClient
      * @param string $uri    URI
      * @param string $method Метод HTTP
      * @param array $data    Данные запроса
-     * @param array $header  Хэдеры
+     * @param array $headers Хэдеры
      *
-     * @return array
+     * @return string
+     * @throws NetworkException
      */
     public function request(
         string $uri,
         string $method = self::METHOD_POST,
         array $data = [],
-        array $header = []
-    ): array {
+        array $headers = []
+    ): string {
         if (empty($uri)) {
             throw new \InvalidArgumentException('Uri must be a non-empty string');
         }
 
         $this->curl->initialize();
-        $this->curl->setOptions($this->curlOptions);
-        $this->curl->setHeader($header);
-        $this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
 
         if ($method === self::METHOD_GET) {
             $uri = $uri . '?' . http_build_query($data);
+            $this->curl->setHeader(['Content-type' => 'application/json']);
         } elseif ($method === self::METHOD_POST) {
             $this->curl->setOption(CURLOPT_POST, 1);
             $this->curl->setOption(CURLOPT_POSTFIELDS, http_build_query($data));
+            $this->curl->setHeader(['Content-type' => 'application/x-www-form-urlencoded']);
         } else {
             throw new \InvalidArgumentException('Valid methods are: GET, POST');
         }
 
+        $this->curl->setOptions($this->curlOptions);
+        $this->curl->setHeader($headers);
+        $this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
         $this->curl->setOption(CURLOPT_URL, $uri);
 
         $response = $this->curl->execute();
@@ -87,16 +76,16 @@ class HttpClient
         if ($response === false) {
             $error = $this->curl->getError();
             $errorCode = $this->curl->getErrno();
-            throw new ClientException("Curl error: $error ($errorCode)");
+            throw new NetworkException("Curl error: $error ($errorCode)");
         }
 
         $statusCode = $this->curl->getInfo(CURLINFO_RESPONSE_CODE);
         if ($statusCode !== 200) {
-            throw new ClientException("$method request resulted in a $statusCode code response");
+            throw new HttpClientException("$method request resulted in a $statusCode code response");
         }
 
         $this->curl->close();
 
-        return json_decode($response, true);
+        return $response;
     }
 }

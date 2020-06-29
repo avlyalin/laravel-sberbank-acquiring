@@ -6,7 +6,8 @@ namespace Avlyalin\SberbankAcquiring\Tests;
 
 use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\HttpClient;
-use Avlyalin\SberbankAcquiring\Exceptions\ClientException;
+use Avlyalin\SberbankAcquiring\Exceptions\HttpClientException;
+use Avlyalin\SberbankAcquiring\Exceptions\NetworkException;
 
 class HttpClientTest extends TestCase
 {
@@ -40,7 +41,7 @@ class HttpClientTest extends TestCase
      */
     public function throws_exception_on_error_response()
     {
-        $this->expectException(ClientException::class);
+        $this->expectException(NetworkException::class);
 
         $curl = \Mockery::mock(Curl::class)->makePartial();
         $curl->shouldReceive('execute')->andReturn(false);
@@ -54,7 +55,7 @@ class HttpClientTest extends TestCase
      */
     public function throws_exception_on_response_status_code_not_200()
     {
-        $this->expectException(ClientException::class);
+        $this->expectException(HttpClientException::class);
 
         $curl = \Mockery::mock(Curl::class)->makePartial();
         $curl->shouldReceive('execute');
@@ -72,6 +73,7 @@ class HttpClientTest extends TestCase
         $curl = \Mockery::mock(Curl::class)->makePartial();
         $curl->shouldReceive('getInfo')->with(CURLINFO_RESPONSE_CODE)->andReturn(200);
         $curl->shouldReceive('execute')->andReturn('{"some":"response"}');
+        $curl->expects()->setHeader(['Content-type' => 'application/json']);
         $curl->expects()->setOption(CURLOPT_URL, 'http://example.com/api/test?param_1=value_1&param_2=value_2');
 
         $client = new HttpClient($curl);
@@ -81,7 +83,7 @@ class HttpClientTest extends TestCase
             ['param_1' => 'value_1', 'param_2' => 'value_2']
         );
 
-        $this->assertEquals(['some' => 'response'], $response);
+        $this->assertEquals('{"some":"response"}', $response);
     }
 
     /**
@@ -95,6 +97,7 @@ class HttpClientTest extends TestCase
         $curl->expects()->setOption(CURLOPT_URL, 'http://example.com/api/test');
         $curl->expects()->setOption(CURLOPT_POST, 1);
         $curl->expects()->setOption(CURLOPT_POSTFIELDS, 'param_1=value_1&param_2=value_2');
+        $curl->expects()->setHeader(['Content-type' => 'application/x-www-form-urlencoded']);
 
         $client = new HttpClient($curl);
         $response = $client->request(
@@ -103,8 +106,7 @@ class HttpClientTest extends TestCase
             ['param_1' => 'value_1', 'param_2' => 'value_2']
         );
 
-
-        $this->assertEquals(['some' => 'response'], $response);
+        $this->assertEquals('{"some":"response"}', $response);
     }
 
 

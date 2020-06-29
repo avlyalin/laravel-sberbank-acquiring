@@ -2,71 +2,202 @@
 
 namespace Avlyalin\SberbankAcquiring\Client;
 
+use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
+
 class Client implements ClientInterface
 {
 
     /**
-     * @inheritDoc
+     * @var mixed|null
      */
-    public function register(int $amount, string $returnUrl, array $params = []): array
+    private $userName;
+
+    /**
+     * @var mixed|null
+     */
+    private $password;
+
+    /**
+     * @var mixed|null
+     */
+    private $token;
+
+    /**
+     * @var mixed|null
+     */
+    private $httpClient;
+
+    /**
+     * @var mixed|null
+     */
+    private $language;
+
+    /**
+     * @var mixed|null
+     */
+    private $currency;
+
+    /**
+     * @var mixed|string
+     */
+    private $baseUri;
+
+    /**
+     * Client constructor.
+     *
+     * <code>
+     * $options = array(
+     *   'userName'   => 'username', // Логин служебной учётной записи продавца
+     *   'password'   => 'password', // Пароль служебной учётной записи продавца
+     *   'token'   => 'token', // Значение, используемое для аутентификации продавца вместо пары userName/password
+     *   'httpClient'   => 'httpClient', // HTTP-клиент
+     *   'baseUri' => 'baseUri', // Адрес сервера
+     *   'language'   => 'token', // Язык в кодировке ISO 639-1
+     *   'currency'   => 'currency', // Код валюты платежа ISO 4217
+     * );
+     *
+     * </code>
+     * @param array $options
+     */
+    public function __construct(array $options)
     {
-        // TODO: Implement register() method.
+        if (isset($options['userName']) && isset($options['password'])) {
+            $this->userName = $options['userName'];
+            $this->password = $options['password'];
+        } elseif (isset($options['token'])) {
+            $this->token = $options['token'];
+        } else {
+            throw new \InvalidArgumentException('"token" or "userName"/"password" pair must be passed');
+        }
+
+        if (isset($options['httpClient'])) {
+            if ($options['httpClient'] instanceof HttpClientInterface) {
+                $this->httpClient = $options['httpClient'];
+            } else {
+                throw new \InvalidArgumentException('"httpClient" must be instance of HttpClientInterface');
+            }
+        }
+
+        $this->baseUri = $options['baseUri'] ?? self::URI_PROD;
+        $this->language = $options['language'] ?? null;
+        $this->currency = $options['currency'] ?? null;
     }
 
     /**
      * @inheritDoc
      */
-    public function registerPreAuth(int $amount, string $returnUrl, array $params = []): array
-    {
-        // TODO: Implement registerPreAuth() method.
+    public function register(
+        int $amount,
+        string $returnUrl,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['amount'] = $amount;
+        $params['returnUrl'] = $returnUrl;
+        return $this->request(self::PATH_REGISTER, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function deposit($orderId, int $amount, array $params = []): array
-    {
-        // TODO: Implement deposit() method.
+    public function registerPreAuth(
+        int $amount,
+        string $returnUrl,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['amount'] = $amount;
+        $params['returnUrl'] = $returnUrl;
+        return $this->request(self::PATH_REGISTER_PRE_AUTH, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function reverse($orderId, array $params = []): array
-    {
-        // TODO: Implement reverse() method.
+    public function deposit(
+        $orderId,
+        int $amount,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['orderId'] = $orderId;
+        $params['amount'] = $amount;
+        return $this->request(self::PATH_DEPOSIT, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function refund($orderId, int $amount, array $params = []): array
-    {
-        // TODO: Implement refund() method.
+    public function reverse(
+        $orderId,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['orderId'] = $orderId;
+        return $this->request(self::PATH_REVERSE, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function getOrderStatus(array $params = []): array
-    {
-        // TODO: Implement getOrderStatus() method.
+    public function refund(
+        $orderId,
+        int $amount,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['orderId'] = $orderId;
+        $params['amount'] = $amount;
+        return $this->request(self::PATH_REFUND, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function payWithApplePay(string $merchant, string $paymentToken, array $params = []): array
-    {
-        // TODO: Implement payWithApplePay() method.
+    public function getOrderStatus(
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        if (isset($params['orderId']) === false && isset($params['orderNumber']) === false) {
+            throw new \InvalidArgumentException('"orderId" either "orderNumber" is required');
+        }
+        return $this->request(self::PATH_GET_ORDER_STATUS_EXTENDED, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function payWithSamsungPay(string $merchant, string $paymentToken, array $params = []): array
-    {
-        // TODO: Implement payWithSamsungPay() method.
+    public function payWithApplePay(
+        string $merchant,
+        string $paymentToken,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['merchant'] = $merchant;
+        $params['paymentToken'] = $paymentToken;
+        return $this->request(self::PATH_APPLE_PAY, $params, $method, $headers);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function payWithSamsungPay(
+        string $merchant,
+        string $paymentToken,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['merchant'] = $merchant;
+        $params['paymentToken'] = $paymentToken;
+        return $this->request(self::PATH_SAMSUNG_PAY, $params, $method, $headers);
     }
 
     /**
@@ -77,64 +208,206 @@ class Client implements ClientInterface
         string $paymentToken,
         int $amount,
         string $returnUrl,
-        array $params = []
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
     ): array {
-        // TODO: Implement payWithGooglePay() method.
+        $params['merchant'] = $merchant;
+        $params['paymentToken'] = $paymentToken;
+        $params['amount'] = $amount;
+        $params['returnUrl'] = $returnUrl;
+        return $this->request(self::PATH_GOOGLE_PAY, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function getReceiptStatus(array $params = []): array
-    {
-        // TODO: Implement getReceiptStatus() method.
+    public function getReceiptStatus(
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        if (
+            isset($params['orderId']) === false &&
+            isset($params['orderNumber']) === false &&
+            isset($params['uuid']) === false
+        ) {
+            throw new \InvalidArgumentException('You must specify "orderId" or "orderNumber" or "uuid" param');
+        }
+        return $this->request(self::PATH_GET_RECEIPT_STATUS, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function bindCard(string $bindingId, array $params = []): array
-    {
-        // TODO: Implement bindCard() method.
+    public function bindCard(
+        string $bindingId,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['bindingId'] = $bindingId;
+        return $this->request(self::PATH_BIND, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function unBindCard(string $bindingId, array $params = []): array
-    {
-        // TODO: Implement unBindCard() method.
+    public function unBindCard(
+        string $bindingId,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['bindingId'] = $bindingId;
+        return $this->request(self::PATH_UNBIND, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function getBindings(string $clientId, array $params = []): array
-    {
-        // TODO: Implement getBindings() method.
+    public function getBindings(
+        string $clientId,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['clientId'] = $clientId;
+        return $this->request(self::PATH_GET_BINDINGS, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function getBindingsByCardOrId(array $params = []): array
-    {
-        // TODO: Implement getBindingsByCardOrId() method.
+    public function getBindingsByCardOrId(
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        return $this->request(self::PATH_GET_BINDINGS_BY_CARD_OR_ID, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function extendBinding(string $bindingId, int $newExpiry, array $params = []): array
-    {
-        // TODO: Implement extendBinding() method.
+    public function extendBinding(
+        string $bindingId,
+        int $newExpiry,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['bindingId'] = $bindingId;
+        $params['newExpiry'] = $newExpiry;
+        return $this->request(self::PATH_EXTEND_BINDING, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function verifyEnrollment(string $pan, array $params = []): array
+    public function verifyEnrollment(
+        string $pan,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $params['pan'] = $pan;
+        return $this->request(self::PATH_VERIFY_ENROLLMENT, $params, $method, $headers);
+    }
+
+
+    /**
+     * @param string $pathName
+     * @param array $params
+     * @param string $method
+     * @param array $headers
+     *
+     * @return array
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\OperationException
+     */
+    public function request(
+        string $pathName,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $uri = $this->buildUri($pathName);
+
+        $authParams = $this->getAuthParams();
+        $commonParams = $this->getCommonParams();
+        $requestParams = array_merge($authParams, $commonParams, $params);
+
+        return $this->makeRequest($uri, $requestParams, $method, $headers);
+    }
+
+    /**
+     * @param string $uri
+     * @param array $params
+     * @param string $method
+     * @param array $headers
+     *
+     * @return array
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\OperationException
+     */
+    private function makeRequest(
+        string $uri,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $httpClient = $this->getHttpClient();
+        $response = $httpClient->request($uri, $method, $params, $headers);
+        $sberbankResponse = new SberbankResponse($response);
+        return $sberbankResponse->getFormattedResponse();
+    }
+
+    /**
+     * Формирует абсолютный URI
+     *
+     * @param string $pathName Относительный путь
+     *
+     * @return string
+     */
+    private function buildUri(string $pathName): string
     {
-        // TODO: Implement verifyEnrollment() method.
+        $baseUri = rtrim($this->baseUri, '/');
+        $relativePath = ltrim($pathName, '/');
+        return "$baseUri/$relativePath";
+    }
+
+    /**
+     * @return HttpClientInterface
+     */
+    private function getHttpClient(): HttpClientInterface
+    {
+        if ($this->httpClient) {
+            return $this->httpClient;
+        }
+        return new HttpClient(new Curl());
+    }
+
+    private function getAuthParams(): array
+    {
+        if ($this->userName && $this->password) {
+            return [
+                'userName' => $this->userName,
+                'password' => $this->password,
+            ];
+        }
+        return ['token' => $this->token];
+    }
+
+    private function getCommonParams(): array
+    {
+        $data = [];
+        if ($this->language) {
+            $data['language'] = $this->language;
+        }
+        if ($this->currency) {
+            $data['currency'] = $this->currency;
+        }
+        return $data;
     }
 }
