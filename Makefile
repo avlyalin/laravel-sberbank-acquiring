@@ -1,6 +1,6 @@
 CURRENT_USER := $(shell id -u)
 CURRENT_GROUP := $(shell id -g)
-DOCKER_COMPOSE_FILE := docker/docker-compose.yml
+DOCKER_COMPOSE_FILE := .docker/docker-compose.yml
 COMPOSER := docker-compose -f $(DOCKER_COMPOSE_FILE) run -u $(CURRENT_USER):$(CURRENT_GROUP) --rm composer
 APP := docker-compose -f $(DOCKER_COMPOSE_FILE) run -u $(CURRENT_USER):$(CURRENT_GROUP) --rm app
 
