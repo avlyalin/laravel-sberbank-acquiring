@@ -42,7 +42,7 @@ class Curl implements CurlInterface
     public function setHeader(array $header)
     {
         foreach ($header as $key => $value) {
-            $this->setOption(CURLOPT_HTTPHEADER, "$key: $value");
+            $this->setOption(CURLOPT_HTTPHEADER, ["$key: $value"]);
         }
     }
 
