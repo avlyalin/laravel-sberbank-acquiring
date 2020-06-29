@@ -138,7 +138,7 @@ interface ClientInterface
      *
      * @return array Ответ сервера
      */
-    public function getOrderStatus(
+    public function getOrderStatusExtended(
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []

@@ -28,16 +28,6 @@ class Client implements ClientInterface
     private $httpClient;
 
     /**
-     * @var mixed|null
-     */
-    private $language;
-
-    /**
-     * @var mixed|null
-     */
-    private $currency;
-
-    /**
      * @var mixed|string
      */
     private $baseUri;
@@ -52,8 +42,6 @@ class Client implements ClientInterface
      *   'token'   => 'token', // Значение, используемое для аутентификации продавца вместо пары userName/password
      *   'httpClient'   => 'httpClient', // HTTP-клиент
      *   'baseUri' => 'baseUri', // Адрес сервера
-     *   'language'   => 'token', // Язык в кодировке ISO 639-1
-     *   'currency'   => 'currency', // Код валюты платежа ISO 4217
      * );
      *
      * </code>
@@ -79,8 +67,6 @@ class Client implements ClientInterface
         }
 
         $this->baseUri = $options['baseUri'] ?? self::URI_PROD;
-        $this->language = $options['language'] ?? null;
-        $this->currency = $options['currency'] ?? null;
     }
 
     /**
@@ -95,7 +81,7 @@ class Client implements ClientInterface
     ): array {
         $params['amount'] = $amount;
         $params['returnUrl'] = $returnUrl;
-        return $this->request(self::PATH_REGISTER, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_REGISTER, $params, $method, $headers);
     }
 
     /**
@@ -110,7 +96,7 @@ class Client implements ClientInterface
     ): array {
         $params['amount'] = $amount;
         $params['returnUrl'] = $returnUrl;
-        return $this->request(self::PATH_REGISTER_PRE_AUTH, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_REGISTER_PRE_AUTH, $params, $method, $headers);
     }
 
     /**
@@ -125,7 +111,7 @@ class Client implements ClientInterface
     ): array {
         $params['orderId'] = $orderId;
         $params['amount'] = $amount;
-        return $this->request(self::PATH_DEPOSIT, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_DEPOSIT, $params, $method, $headers);
     }
 
     /**
@@ -138,7 +124,7 @@ class Client implements ClientInterface
         array $headers = []
     ): array {
         $params['orderId'] = $orderId;
-        return $this->request(self::PATH_REVERSE, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_REVERSE, $params, $method, $headers);
     }
 
     /**
@@ -153,13 +139,13 @@ class Client implements ClientInterface
     ): array {
         $params['orderId'] = $orderId;
         $params['amount'] = $amount;
-        return $this->request(self::PATH_REFUND, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_REFUND, $params, $method, $headers);
     }
 
     /**
      * @inheritDoc
      */
-    public function getOrderStatus(
+    public function getOrderStatusExtended(
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
@@ -167,7 +153,7 @@ class Client implements ClientInterface
         if (isset($params['orderId']) === false && isset($params['orderNumber']) === false) {
             throw new \InvalidArgumentException('"orderId" either "orderNumber" is required');
         }
-        return $this->request(self::PATH_GET_ORDER_STATUS_EXTENDED, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_GET_ORDER_STATUS_EXTENDED, $params, $method, $headers);
     }
 
     /**
@@ -234,7 +220,7 @@ class Client implements ClientInterface
         ) {
             throw new \InvalidArgumentException('You must specify "orderId" or "orderNumber" or "uuid" param');
         }
-        return $this->request(self::PATH_GET_RECEIPT_STATUS, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_GET_RECEIPT_STATUS, $params, $method, $headers);
     }
 
     /**
@@ -247,7 +233,7 @@ class Client implements ClientInterface
         array $headers = []
     ): array {
         $params['bindingId'] = $bindingId;
-        return $this->request(self::PATH_BIND, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_BIND, $params, $method, $headers);
     }
 
     /**
@@ -260,7 +246,7 @@ class Client implements ClientInterface
         array $headers = []
     ): array {
         $params['bindingId'] = $bindingId;
-        return $this->request(self::PATH_UNBIND, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_UNBIND, $params, $method, $headers);
     }
 
     /**
@@ -284,7 +270,7 @@ class Client implements ClientInterface
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
     ): array {
-        return $this->request(self::PATH_GET_BINDINGS_BY_CARD_OR_ID, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_GET_BINDINGS_BY_CARD_OR_ID, $params, $method, $headers);
     }
 
     /**
@@ -299,7 +285,7 @@ class Client implements ClientInterface
     ): array {
         $params['bindingId'] = $bindingId;
         $params['newExpiry'] = $newExpiry;
-        return $this->request(self::PATH_EXTEND_BINDING, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_EXTEND_BINDING, $params, $method, $headers);
     }
 
     /**
@@ -312,9 +298,29 @@ class Client implements ClientInterface
         array $headers = []
     ): array {
         $params['pan'] = $pan;
-        return $this->request(self::PATH_VERIFY_ENROLLMENT, $params, $method, $headers);
+        return $this->requestWithAuth(self::PATH_VERIFY_ENROLLMENT, $params, $method, $headers);
     }
 
+    /**
+     * @param string $pathName
+     * @param array $params
+     * @param string $method
+     * @param array $headers
+     *
+     * @return array
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\OperationException
+     */
+    public function requestWithAuth(
+        string $pathName,
+        array $params = [],
+        string $method = HttpClientInterface::METHOD_POST,
+        array $headers = []
+    ): array {
+        $authParams = $this->getAuthParams();
+        $requestParams = array_merge($authParams, $params);
+        return $this->request($pathName, $requestParams, $method, $headers);
+    }
 
     /**
      * @param string $pathName
@@ -333,30 +339,6 @@ class Client implements ClientInterface
         array $headers = []
     ): array {
         $uri = $this->buildUri($pathName);
-
-        $authParams = $this->getAuthParams();
-        $commonParams = $this->getCommonParams();
-        $requestParams = array_merge($authParams, $commonParams, $params);
-
-        return $this->makeRequest($uri, $requestParams, $method, $headers);
-    }
-
-    /**
-     * @param string $uri
-     * @param array $params
-     * @param string $method
-     * @param array $headers
-     *
-     * @return array
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\OperationException
-     */
-    private function makeRequest(
-        string $uri,
-        array $params = [],
-        string $method = HttpClientInterface::METHOD_POST,
-        array $headers = []
-    ): array {
         $httpClient = $this->getHttpClient();
         $response = $httpClient->request($uri, $method, $params, $headers);
         $sberbankResponse = new SberbankResponse($response);
@@ -397,17 +379,5 @@ class Client implements ClientInterface
             ];
         }
         return ['token' => $this->token];
-    }
-
-    private function getCommonParams(): array
-    {
-        $data = [];
-        if ($this->language) {
-            $data['language'] = $this->language;
-        }
-        if ($this->currency) {
-            $data['currency'] = $this->currency;
-        }
-        return $data;
     }
 }

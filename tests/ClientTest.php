@@ -90,25 +90,16 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_uses_custom_options_from_constructor_args()
+    public function it_uses_base_uri_from_constructor_args()
     {
-        $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
-            if (
-                strpos($uri, 'https://some-test-uri.com/root-path') === 0 &&
-                $data['language'] === 'DE' &&
-                $data['currency'] === 'DEM'
-            ) {
-                return true;
-            }
-            return false;
+        $httpClient = $this->getHttpClientMock(function ($uri) {
+            return strpos($uri, 'https://some-test-uri.com/root-path') === 0;
         });
 
         $client = new Client([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'DE',
-            'currency' => 'DEM',
         ]);
         $client->register(1000, 'http://return-url.test');
     }
@@ -116,7 +107,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_uses_production_uri_when_base_uri_option_not_passed()
+    public function it_uses_production_uri_when_base_uri_param_not_passed()
     {
         $httpClient = $this->getHttpClientMock(function ($uri) {
             return strpos($uri, Client::URI_PROD) === 0;
@@ -132,7 +123,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_register_with_required_args_and_returns_response()
+    public function it_calls_register_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -154,21 +145,22 @@ class ClientTest extends TestCase
         $response = $client->register(1500, 'http://return-url.test/api/success');
 
         $this->assertEquals([
-            "orderId" => "f5vd34",
-            "formUrl" => "http://pay.test-pay.test?id=v44gds",
+            'orderId' => 'f5vd34',
+            'formUrl' => 'http://pay.test-pay.test?id=v44gds',
         ], $response);
     }
 
     /**
      * @test
      */
-    public function it_calls_register_with_optional_args_and_returns_response()
+    public function it_calls_register_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REGISTER &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
+                $data['currency'] === Currency::EUR &&
                 $data['amount'] === 1500 &&
                 $data['returnUrl'] === 'http://return-url.test/api/success' &&
                 $data['orderNumber'] === '123fds543' &&
@@ -184,26 +176,30 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'EN',
         ]);
         $response = $client->register(
             1500,
             'http://return-url.test/api/success',
-            ['orderNumber' => '123fds543', 'description' => 'register operation description'],
+            [
+                'orderNumber' => '123fds543',
+                'description' => 'register operation description',
+                'language' => 'EN',
+                'currency' => Currency::EUR,
+            ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/html']]
         );
 
         $this->assertEquals([
-            "orderId" => "5bc91mcx",
-            "formUrl" => "http://pay.test-pay.test?id=bv5d16",
+            'orderId' => '5bc91mcx',
+            'formUrl' => 'http://pay.test-pay.test?id=bv5d16',
         ], $response);
     }
 
     /**
      * @test
      */
-    public function it_calls_register_with_pre_auth_with_required_args_and_returns_response()
+    public function it_calls_register_with_pre_auth_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -225,21 +221,22 @@ class ClientTest extends TestCase
         $response = $client->registerPreAuth(2000, 'http://return-url.test/api/success');
 
         $this->assertEquals([
-            "orderId" => "9n21cx",
-            "formUrl" => "http://pay.test-pay.test?id=gb73wc",
+            'orderId' => '9n21cx',
+            'formUrl' => 'http://pay.test-pay.test?id=gb73wc',
         ], $response);
     }
 
     /**
      * @test
      */
-    public function it_calls_register_with_pre_auth_with_optional_args_and_returns_response()
+    public function it_calls_register_with_pre_auth_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REGISTER_PRE_AUTH &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
+                $data['currency'] === Currency::EUR &&
                 $data['amount'] === 2000 &&
                 $data['returnUrl'] === 'http://return-url.test/api/success' &&
                 $data['orderNumber'] === '11142vcv' &&
@@ -255,26 +252,30 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'EN',
         ]);
         $response = $client->registerPreAuth(
             2000,
             'http://return-url.test/api/success',
-            ['orderNumber' => '11142vcv', 'description' => 'register with pre auth operation description'],
+            [
+                'orderNumber' => '11142vcv',
+                'description' => 'register with pre auth operation description',
+                'language' => 'EN',
+                'currency' => Currency::EUR,
+            ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/html']]
         );
 
         $this->assertEquals([
-            "orderId" => "v743vcx",
-            "formUrl" => "http://pay.test-pay.test?id=6r5evc",
+            'orderId' => 'v743vcx',
+            'formUrl' => 'http://pay.test-pay.test?id=6r5evc',
         ], $response);
     }
 
     /**
      * @test
      */
-    public function it_calls_deposit_with_required_args_and_returns_response()
+    public function it_calls_deposit_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -301,17 +302,14 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_deposit_with_optional_args_and_returns_response()
+    public function it_calls_deposit_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_DEPOSIT &&
                 $method === HttpClientInterface::METHOD_GET &&
-                $data['language'] === 'EN' &&
-                $data['currency'] === Currency::EUR &&
                 $data['orderId'] === '8n421v' &&
                 $data['amount'] === 2100 &&
-                $data['param'] === 'additional deposit operation param' &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -323,13 +321,11 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'EN',
-            'currency' => Currency::EUR,
         ]);
         $response = $client->deposit(
             '8n421v',
             2100,
-            ['param' => 'additional deposit operation param'],
+            [],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
         );
@@ -340,7 +336,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_reverse_with_required_args_and_returns_response()
+    public function it_calls_reverse_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -366,16 +362,14 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_reverse_with_optional_args_and_returns_response()
+    public function it_calls_reverse_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REVERSE &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'IT' &&
-                $data['currency'] === Currency::USD &&
                 $data['orderId'] === 'vc91mx' &&
-                $data['param'] === 'additional reverse operation param' &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -388,11 +382,10 @@ class ClientTest extends TestCase
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
             'language' => 'IT',
-            'currency' => Currency::USD,
         ]);
         $response = $client->reverse(
             'vc91mx',
-            ['param' => 'additional reverse operation param'],
+            ['language' => 'IT'],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
         );
@@ -403,7 +396,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_refund_with_required_args_and_returns_response()
+    public function it_calls_refund_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -431,17 +424,14 @@ class ClientTest extends TestCase
      *
      * @test
      */
-    public function it_calls_refund_with_optional_args_and_returns_response()
+    public function it_calls_refund_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REFUND &&
                 $method === HttpClientInterface::METHOD_GET &&
-                $data['language'] === 'EN' &&
-                $data['currency'] === Currency::USD &&
                 $data['orderId'] === 'b9c041v' &&
                 $data['amount'] === 500 &&
-                $data['param'] === 'additional refund operation param' &&
                 $headers === [['content-type' => 'application/json']]
             ) {
                 return true;
@@ -453,13 +443,11 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'EN',
-            'currency' => Currency::USD,
         ]);
         $response = $client->refund(
             'b9c041v',
             500,
-            ['param' => 'additional refund operation param'],
+            [],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'application/json']]
         );
@@ -470,7 +458,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_throws_exception_when_get_order_status_called_without_required_args()
+    public function it_throws_exception_when_get_order_status_extended_called_without_required_params()
     {
         $this->expectException(\InvalidArgumentException::class);
 
@@ -478,13 +466,13 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'baseUri' => 'https://some-test-uri.com/root-path',
         ]);
-        $response = $client->getOrderStatus([]);
+        $response = $client->getOrderStatusExtended([]);
     }
 
     /**
      * @test
      */
-    public function it_calls_get_order_status_with_order_id_param_and_returns_response()
+    public function it_calls_get_order_status_extended_with_order_id_param_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -502,7 +490,7 @@ class ClientTest extends TestCase
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
         ]);
-        $response = $client->getOrderStatus(['orderId' => '1m9cm12']);
+        $response = $client->getOrderStatusExtended(['orderId' => '1m9cm12']);
 
         $this->assertEquals(['orderStatus' => 0, 'amount' => 1000], $response);
     }
@@ -510,7 +498,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_get_order_status_with_order_number_param_and_returns_response()
+    public function it_calls_get_order_status_extended_with_order_number_param_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -528,7 +516,7 @@ class ClientTest extends TestCase
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
         ]);
-        $response = $client->getOrderStatus(['orderNumber' => '12mcxsm5']);
+        $response = $client->getOrderStatusExtended(['orderNumber' => '12mcxsm5']);
 
         $this->assertEquals(['orderStatus' => 1, 'amount' => 5000], $response);
     }
@@ -537,16 +525,14 @@ class ClientTest extends TestCase
      *
      * @test
      */
-    public function it_calls_get_order_status_with_optional_args_and_returns_response()
+    public function it_calls_get_order_status_extended_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_ORDER_STATUS_EXTENDED &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'RU' &&
-                $data['currency'] === Currency::RUB &&
                 $data['orderId'] === '129m41' &&
-                $data['param'] === 'additional get order status operation param' &&
                 $headers === [['content-type' => 'application/json']]
             ) {
                 return true;
@@ -558,13 +544,11 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'RU',
-            'currency' => Currency::RUB,
         ]);
-        $response = $client->getOrderStatus(
+        $response = $client->getOrderStatusExtended(
             [
                 'orderId' => '129m41',
-                'param' => 'additional get order status operation param',
+                'language' => 'RU',
             ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'application/json']]
@@ -572,9 +556,9 @@ class ClientTest extends TestCase
 
         $this->assertEquals(
             [
-                "orderStatus" => 2,
-                "amount" => 5000,
-                "orderDescription" => "order description",
+                'orderStatus' => 2,
+                'amount' => 5000,
+                'orderDescription' => "order description",
             ],
             $response
         );
@@ -583,7 +567,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_pay_with_apple_pay_with_required_args_and_returns_response()
+    public function it_calls_pay_with_apple_pay_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -610,14 +594,13 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_pay_with_apple_pay_with_optional_args_and_returns_response()
+    public function it_calls_pay_with_apple_pay_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_APPLE_PAY &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['language'] === 'RU' &&
-                $data['currency'] === Currency::RUB &&
                 $data['merchant'] === 'merchant_login_142d' &&
                 $data['preAuth'] === true &&
                 $data['paymentToken'] === '1mvi9cxm.s,mvc912' &&
@@ -632,15 +615,14 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'RU',
-            'currency' => Currency::RUB,
         ]);
         $response = $client->payWithApplePay(
             'merchant_login_142d',
             '1mvi9cxm.s,mvc912',
             [
-                'preAuth' => true,
                 'description' => 'pay with apple pay operation description',
+                'language' => 'RU',
+                'preAuth' => true,
             ]
         );
 
@@ -650,7 +632,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_pay_with_samsung_pay_with_required_args_and_returns_response()
+    public function it_calls_pay_with_samsung_pay_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -677,14 +659,14 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_pay_with_samsung_pay_with_optional_args_and_returns_response()
+    public function it_calls_pay_with_samsung_pay_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_SAMSUNG_PAY &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
-                $data['currency'] === Currency::USD &&
+                $data['currencyCode'] === Currency::USD &&
                 $data['merchant'] === 'merchant_login_bv71n' &&
                 $data['preAuth'] === true &&
                 $data['paymentToken'] === 'vc81nmvxc91' &&
@@ -700,15 +682,15 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'EN',
-            'currency' => Currency::USD,
         ]);
         $response = $client->payWithSamsungPay(
             'merchant_login_bv71n',
             'vc81nmvxc91',
             [
-                'preAuth' => true,
                 'description' => 'pay with samsung pay operation description',
+                'language' => 'EN',
+                'preAuth' => true,
+                'currencyCode' => Currency::USD,
             ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'application/json']]
@@ -720,7 +702,7 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_pay_with_google_pay_with_required_args_and_returns_response()
+    public function it_calls_pay_with_google_pay_with_required_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
@@ -754,14 +736,14 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function it_calls_pay_with_google_pay_with_optional_args_and_returns_response()
+    public function it_calls_pay_with_google_pay_with_optional_params_and_returns_response()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GOOGLE_PAY &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
-                $data['currency'] === Currency::USD &&
+                $data['currencyCode'] === Currency::USD &&
                 $data['merchant'] === 'merchant_login_1nvc781' &&
                 $data['amount'] === 1200 &&
                 $data['returnUrl'] === 'https://test-pay.test/api/success' &&
@@ -779,8 +761,6 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'EN',
-            'currency' => Currency::USD,
         ]);
         $response = $client->payWithGooglePay(
             'merchant_login_1nvc781',
@@ -788,8 +768,10 @@ class ClientTest extends TestCase
             1200,
             'https://test-pay.test/api/success',
             [
-                'preAuth' => true,
                 'description' => 'pay with google pay operation description',
+                'language' => 'EN',
+                'preAuth' => true,
+                'currencyCode' => Currency::USD,
             ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/html']]
@@ -881,7 +863,6 @@ class ClientTest extends TestCase
                 $data['uuid'] === '2139vm-bv-52vc-124bc' &&
                 $data['orderId'] === 'v98l,91m6n532' &&
                 $data['language'] === 'FR' &&
-                $data['currency'] === Currency::EUR &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -893,13 +874,12 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'FR',
-            'currency' => Currency::EUR,
         ]);
         $response = $client->getReceiptStatus(
             [
                 'orderId' => 'v98l,91m6n532',
                 'uuid' => '2139vm-bv-52vc-124bc',
+                'language' => 'FR',
             ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
@@ -916,7 +896,7 @@ class ClientTest extends TestCase
      */
     public function it_calls_bind_card_with_required_params_and_returns_response()
     {
-        $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
+        $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_BIND &&
                 $method === HttpClientInterface::METHOD_POST &&
@@ -947,9 +927,6 @@ class ClientTest extends TestCase
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_BIND &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['bindingId'] === '9m41v0bcdm1' &&
-                $data['language'] === 'RU' &&
-                $data['currency'] === Currency::RUB &&
-                $data['param'] === 'optional param' &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -961,12 +938,10 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'RU',
-            'currency' => Currency::RUB,
         ]);
         $response = $client->bindCard(
             '9m41v0bcdm1',
-            ['param' => 'optional param'],
+            [],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
         );
@@ -1010,9 +985,6 @@ class ClientTest extends TestCase
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_UNBIND &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['bindingId'] === '75b4b325' &&
-                $data['language'] === 'EN' &&
-                $data['currency'] === Currency::USD &&
-                $data['param'] === 'optional param' &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -1024,12 +996,10 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'EN',
-            'currency' => Currency::USD,
         ]);
         $response = $client->unBindCard(
             '75b4b325',
-            ['param' => 'optional param'],
+            [],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
         );
@@ -1073,9 +1043,6 @@ class ClientTest extends TestCase
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_BINDINGS &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['clientId'] === '8vcm53-1234cf' &&
-                $data['language'] === 'IT' &&
-                $data['currency'] === Currency::EUR &&
-                $data['param'] === 'optional param' &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -1087,12 +1054,10 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'IT',
-            'currency' => Currency::EUR,
         ]);
         $response = $client->getBindings(
             '8vcm53-1234cf',
-            ['param' => 'optional param'],
+            [],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
         );
@@ -1111,8 +1076,6 @@ class ClientTest extends TestCase
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['pan'] === '01mv8n123cx' &&
                 $data['language'] === 'DE' &&
-                $data['currency'] === Currency::EUR &&
-                $data['param'] === 'optional param' &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -1124,13 +1087,12 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'DE',
             'currency' => Currency::EUR,
         ]);
         $response = $client->getBindingsByCardOrId(
             [
                 'pan' => '01mv8n123cx',
-                'param' => 'optional param',
+                'language' => 'DE',
             ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
@@ -1160,8 +1122,6 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'DE',
-            'currency' => Currency::EUR,
         ]);
         $response = $client->extendBinding('10vmxs121', 202201);
 
@@ -1180,8 +1140,6 @@ class ClientTest extends TestCase
                 $data['bindingId'] === '912nvc82112' &&
                 $data['newExpiry'] === 202012 &&
                 $data['language'] === 'RU' &&
-                $data['currency'] === Currency::RUB &&
-                $data['param'] === 'optional param' &&
                 $headers === [['content-type' => 'text/plain']]
             ) {
                 return true;
@@ -1193,14 +1151,13 @@ class ClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
-            'language' => 'RU',
             'currency' => Currency::RUB,
         ]);
         $response = $client->extendBinding(
             '912nvc82112',
             202012,
             [
-                'param' => 'optional param',
+                'language' => 'RU',
             ],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'text/plain']]
@@ -1245,9 +1202,6 @@ class ClientTest extends TestCase
                 $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_VERIFY_ENROLLMENT &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['pan'] === '5555-4444-3333-2222' &&
-                $data['language'] === 'RU' &&
-                $data['currency'] === Currency::RUB &&
-                $data['param'] === 'optional param' &&
                 $headers === [['content-type' => 'application/json']]
             ) {
                 return true;
@@ -1264,9 +1218,7 @@ class ClientTest extends TestCase
         ]);
         $response = $client->verifyEnrollment(
             '5555-4444-3333-2222',
-            [
-                'param' => 'optional param',
-            ],
+            [],
             HttpClientInterface::METHOD_GET,
             [['content-type' => 'application/json']]
         );
