@@ -9,12 +9,12 @@ services:
   app:
     build:
       context: ..
-      dockerfile: ./docker/app.Dockerfile
+      dockerfile: ./.docker/app.Dockerfile
     depends_on:
       - composer
     volumes:
     - "../:/app"
-    - "./php.ini:/usr/local/etc/php/conf.d/php.ini"
+    - "./conf.ini:/usr/local/etc/php/conf.d/conf.ini"
 
 networks:
   default:
