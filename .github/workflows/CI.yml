@@ -48,7 +48,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-            composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "mockery/mockery:${{ matrix.mockery }}" "symfony/console:>=4.3.4" --no-interaction --no-update
+            composer require "laravel/laravel:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "mockery/mockery:${{ matrix.mockery }}" "symfony/console:>=4.3.4" --no-interaction --no-update
             composer update --prefer-dist --no-interaction --no-suggest
 
       - name: Run linting
