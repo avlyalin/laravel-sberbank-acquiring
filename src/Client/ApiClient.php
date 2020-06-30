@@ -49,21 +49,15 @@ class ApiClient implements ClientInterface
      */
     public function __construct(array $options)
     {
+        if (isset($options['httpClient'])) {
+            $this->httpClient = $options['httpClient'];
+        }
+
         if (isset($options['userName']) && isset($options['password'])) {
             $this->userName = $options['userName'];
             $this->password = $options['password'];
         } elseif (isset($options['token'])) {
             $this->token = $options['token'];
-        } else {
-            throw new \InvalidArgumentException('"token" or "userName"/"password" pair must be passed');
-        }
-
-        if (isset($options['httpClient'])) {
-            if ($options['httpClient'] instanceof HttpClientInterface) {
-                $this->httpClient = $options['httpClient'];
-            } else {
-                throw new \InvalidArgumentException('"httpClient" must be instance of HttpClientInterface');
-            }
         }
 
         $this->baseUri = $options['baseUri'] ?? self::URI_PROD;
@@ -317,9 +311,23 @@ class ApiClient implements ClientInterface
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
     ): array {
-        $authParams = $this->getAuthParams();
-        $requestParams = array_merge($authParams, $params);
-        return $this->request($pathName, $requestParams, $method, $headers);
+        if (empty($params['userName']) === false && empty($params['password']) === false) {
+            unset($params['token']);
+        } elseif (empty($this->userName) === false && empty($this->password) === false) {
+            unset($params['token']);
+            $params['userName'] = $this->userName;
+            $params['password'] = $this->password;
+        } elseif (empty($params['token']) === false) {
+            unset($params['userName']);
+            unset($params['password']);
+        } elseif (empty($this->token) === false) {
+            unset($params['userName']);
+            unset($params['password']);
+            $params['token'] = $this->token;
+        } else {
+            throw new \InvalidArgumentException('You must specify "userName"/"password" pair or "token"');
+        }
+        return $this->request($pathName, $params, $method, $headers);
     }
 
     /**
@@ -364,20 +372,12 @@ class ApiClient implements ClientInterface
      */
     private function getHttpClient(): HttpClientInterface
     {
-        if ($this->httpClient) {
-            return $this->httpClient;
+        if (isset($this->httpClient)) {
+            if ($this->httpClient instanceof HttpClientInterface) {
+                return $this->httpClient;
+            }
+            throw new \InvalidArgumentException('"httpClient" must be instance of HttpClientInterface');
         }
         return new HttpClient(new Curl());
-    }
-
-    private function getAuthParams(): array
-    {
-        if ($this->userName && $this->password) {
-            return [
-                'userName' => $this->userName,
-                'password' => $this->password,
-            ];
-        }
-        return ['token' => $this->token];
     }
 }

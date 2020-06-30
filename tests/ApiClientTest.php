@@ -20,6 +20,7 @@ class ApiClientTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $client = new ApiClient([]);
+        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
     }
 
     /**
@@ -34,6 +35,7 @@ class ApiClientTest extends TestCase
             'password' => 'test_password',
             'httpClient' => $httpClient,
         ]);
+        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
     }
 
     /**
@@ -42,7 +44,7 @@ class ApiClientTest extends TestCase
     public function it_sends_username_and_password_within_request_data()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
-            return isset($data['userName']) && isset($data['password']);
+            return $data['userName'] === 'test_username' && $data['password'] === 'test_password';
         });
 
         $client = new ApiClient([
@@ -50,7 +52,7 @@ class ApiClientTest extends TestCase
             'password' => 'test_password',
             'httpClient' => $httpClient,
         ]);
-        $client->register(1000, 'http://return-url.test');
+        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
     }
 
     /**
@@ -59,32 +61,87 @@ class ApiClientTest extends TestCase
     public function it_sends_token_within_request_data()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
-            return isset($data['token']) && $data['token'] === 'auth_token';
+            return $data['token'] === 'auth_token';
         });
 
         $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
         ]);
-        $client->register(1000, 'http://return-url.test');
+        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
     }
 
     /**
      * @test
      */
-    public function it_omits_token_when_username_and_password_are_present()
+    public function it_omits_constructor_username_and_password_when_username_and_password_are_present_in_params()
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
-            return $data['userName'] === 'test_username' && $data['password'] === 'test_password';
+            return $data['userName'] === 'params_username' && $data['password'] === 'params_password';
         });
 
         $client = new ApiClient([
-            'userName' => 'test_username',
-            'password' => 'test_password',
-            'token' => 'auth_token',
+            'userName' => 'constructor_username',
+            'password' => 'constructor_password',
             'httpClient' => $httpClient,
         ]);
-        $client->register(1000, 'http://return-url.test');
+        $client->requestWithAuth(
+            ClientInterface::PATH_REGISTER,
+            [
+                'userName' => 'params_username',
+                'password' => 'params_password',
+            ]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function it_omits_token_from_params_when_username_and_password_are_set_in_constructor()
+    {
+        $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
+            if (
+                $data['userName'] === 'constructor_username' &&
+                $data['password'] === 'constructor_password' &&
+                isset($data['token']) === false
+            ) {
+                return true;
+            }
+            return false;
+        });
+
+        $client = new ApiClient([
+            'userName' => 'constructor_username',
+            'password' => 'constructor_password',
+            'httpClient' => $httpClient,
+        ]);
+        $client->requestWithAuth(
+            ClientInterface::PATH_REGISTER,
+            [
+                'token' => 'params_token',
+            ]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function it_omits_token_from_constructor_when_token_set_in_params()
+    {
+        $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
+            return $data['token'] === 'params_token';
+        });
+
+        $client = new ApiClient([
+            'token' => 'constructor_token',
+            'httpClient' => $httpClient,
+        ]);
+        $client->requestWithAuth(
+            ClientInterface::PATH_REGISTER,
+            [
+                'token' => 'params_token',
+            ]
+        );
     }
 
     /**
