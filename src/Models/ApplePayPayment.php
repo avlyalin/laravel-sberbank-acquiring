@@ -11,4 +11,17 @@ class ApplePayPayment extends BaseModel implements PaymentInterface
     protected $tableNameKey = 'apple_pay_payments';
 
     public $timestamps = false;
+
+    protected $fillable = [
+        'payment_id',
+        'order_number',
+        'description',
+        'language',
+        'additional_parameters',
+        'pre_auth',
+    ];
+
+    protected $casts = [
+        'additional_parameters' => 'array',
+    ];
 }

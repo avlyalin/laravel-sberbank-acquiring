@@ -11,4 +11,19 @@ class SamsungPayPayment extends BaseModel implements PaymentInterface
     protected $tableNameKey = 'samsung_pay_payments';
 
     public $timestamps = false;
+
+    protected $fillable = [
+        'payment_id',
+        'order_number',
+        'description',
+        'language',
+        'additional_parameters',
+        'pre_auth',
+        'client_id',
+        'ip',
+    ];
+
+    protected $casts = [
+        'additional_parameters' => 'array',
+    ];
 }
