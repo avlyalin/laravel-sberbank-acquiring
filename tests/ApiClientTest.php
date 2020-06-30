@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Tests;
 
-use Avlyalin\SberbankAcquiring\Client\Client;
+use Avlyalin\SberbankAcquiring\Client\ApiClient;
 use Avlyalin\SberbankAcquiring\Client\ClientInterface;
 use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\HttpClient;
 use Avlyalin\SberbankAcquiring\Client\HttpClientInterface;
 use Avlyalin\SberbankAcquiring\Helpers\Currency;
 
-class ClientTest extends TestCase
+class ApiClientTest extends TestCase
 {
     /**
      * @test
@@ -19,7 +19,7 @@ class ClientTest extends TestCase
     public function it_throws_an_exception_when_username_password_and_token_are_omitted()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $client = new Client([]);
+        $client = new ApiClient([]);
     }
 
     /**
@@ -29,7 +29,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $httpClient = new \stdClass();
-        $client = new Client([
+        $client = new ApiClient([
             'userName' => 'test_username',
             'password' => 'test_password',
             'httpClient' => $httpClient,
@@ -45,7 +45,7 @@ class ClientTest extends TestCase
             return isset($data['userName']) && isset($data['password']);
         });
 
-        $client = new Client([
+        $client = new ApiClient([
             'userName' => 'test_username',
             'password' => 'test_password',
             'httpClient' => $httpClient,
@@ -62,7 +62,7 @@ class ClientTest extends TestCase
             return isset($data['token']) && $data['token'] === 'auth_token';
         });
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
         ]);
@@ -78,7 +78,7 @@ class ClientTest extends TestCase
             return $data['userName'] === 'test_username' && $data['password'] === 'test_password';
         });
 
-        $client = new Client([
+        $client = new ApiClient([
             'userName' => 'test_username',
             'password' => 'test_password',
             'token' => 'auth_token',
@@ -96,7 +96,7 @@ class ClientTest extends TestCase
             return strpos($uri, 'https://some-test-uri.com/root-path') === 0;
         });
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -110,10 +110,10 @@ class ClientTest extends TestCase
     public function it_uses_production_uri_when_base_uri_param_not_passed()
     {
         $httpClient = $this->getHttpClientMock(function ($uri) {
-            return strpos($uri, Client::URI_PROD) === 0;
+            return strpos($uri, ApiClient::URI_PROD) === 0;
         });
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
         ]);
@@ -137,7 +137,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0, "orderId": "f5vd34", "formUrl":"http://pay.test-pay.test?id=v44gds"}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -172,7 +172,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0, "orderId": "5bc91mcx", "formUrl":"http://pay.test-pay.test?id=bv5d16"}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -213,7 +213,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0, "orderId": "9n21cx", "formUrl":"http://pay.test-pay.test?id=gb73wc"}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -248,7 +248,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0, "orderId": "v743vcx", "formUrl":"http://pay.test-pay.test?id=6r5evc"}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -289,7 +289,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -317,7 +317,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -349,7 +349,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -377,7 +377,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -410,7 +410,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -439,7 +439,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -462,7 +462,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'baseUri' => 'https://some-test-uri.com/root-path',
         ]);
@@ -485,7 +485,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"amount":1000,"orderStatus":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -511,7 +511,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"amount":5000,"orderStatus":1}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -540,7 +540,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"orderStatus":2,"amount":5000,"orderDescription":"order description"}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -581,7 +581,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"error":{"code":0},"success":true,"data":{"orderId":"21cx1421"}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -611,7 +611,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"error":{"code":0},"success":true,"data":{"orderId":"1nmxz9vm+412"}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -646,7 +646,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"error":{"code":0},"success":true,"data":{"orderId":"mv9n1242,vcx"}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -678,7 +678,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"error":{"code":0},"success":true,"data":{"orderId":"mv81m-u7n51"}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -718,7 +718,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"error":{"code":0},"success":true,"data":{"orderId":"vun441m,c"}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -757,7 +757,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"error":{"code":0},"success":true,"data":{"orderId":"v81-8bvm532"}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -787,7 +787,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
         ]);
         $response = $client->getReceiptStatus([]);
@@ -809,7 +809,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"orderId":"9nv352-mda1","receipt":{"receiptStatus":1}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -838,7 +838,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"orderId":"m9m1vc-012","receipt":{"receiptStatus":1}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -870,7 +870,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"orderId":"v98l,91m6n532","receipt":{"receiptStatus":1}}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -907,7 +907,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -934,7 +934,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -965,7 +965,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -992,7 +992,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -1023,7 +1023,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -1050,7 +1050,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -1083,7 +1083,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -1118,7 +1118,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -1147,7 +1147,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -1182,7 +1182,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"enrolled":true,"emitterName":"Emitter bank"}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',
@@ -1209,7 +1209,7 @@ class ClientTest extends TestCase
             return false;
         }, '{"errorCode":0,"enrolled":true,"emitterName":"Emitter bank"}');
 
-        $client = new Client([
+        $client = new ApiClient([
             'token' => 'auth_token',
             'httpClient' => $httpClient,
             'baseUri' => 'https://some-test-uri.com/root-path',

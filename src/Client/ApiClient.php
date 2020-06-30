@@ -4,7 +4,7 @@ namespace Avlyalin\SberbankAcquiring\Client;
 
 use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 
-class Client implements ClientInterface
+class ApiClient implements ClientInterface
 {
 
     /**
