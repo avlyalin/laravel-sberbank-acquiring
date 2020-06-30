@@ -1,0 +1,54 @@
+<?php
+
+namespace Avlyalin\SberbankAcquiring\Models;
+
+use Avlyalin\SberbankAcquiring\Database\HasConfig;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+
+class AcquiringPaymentOperation extends BaseModel
+{
+    protected $tableNameKey = 'payment_operations';
+
+    protected $casts = [
+        'request_json' => 'array',
+        'response_json' => 'array',
+    ];
+
+    /**
+     * Пользователь-инициатор операции
+     *
+     * @return BelongsTo|null
+     * @throws Exception
+     */
+    public function user(): ?BelongsTo
+    {
+        return $this->belongsTo(
+            $this->getConfigValueByKey('user.model'),
+            'user_id',
+            $this->getConfigValueByKey('user.primary_key')
+        );
+    }
+
+    /**
+     * Платеж
+     *
+     * @return BelongsTo
+     */
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(AcquiringPayment::class, 'payment_id', 'id');
+    }
+
+    /**
+     * Тип операции
+     *
+     * @return BelongsTo
+     */
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(DictAcquiringPaymentOperationType::class, 'type_id', 'id');
+    }
+}

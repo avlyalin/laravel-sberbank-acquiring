@@ -3,7 +3,13 @@
 namespace Avlyalin\SberbankAcquiring\Tests;
 
 use Avlyalin\SberbankAcquiring\AcquiringServiceProvider;
-use Illuminate\Database\Schema\Blueprint;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperation;
+use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
+use Avlyalin\SberbankAcquiring\Models\GooglePayPayment;
+use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
+use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
+use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -14,6 +20,8 @@ class TestCase extends Orchestra
         parent::setUp();
 
         $this->setUpDatabase($this->app);
+
+        $this->registerEloquentFactories($this->app);
     }
 
     protected function getPackageProviders($app)
@@ -36,11 +44,55 @@ class TestCase extends Orchestra
      */
     private function setUpDatabase(Application $app)
     {
-        $app['db']->connection()->getSchemaBuilder()->create('users', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('email');
-        });
-
+        $this->loadMigrationsFrom(__DIR__ . '/../vendor/laravel/laravel/database/migrations');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+    }
+
+    /**
+     * Регистрация фабрик
+     *
+     * @param Application $app
+     */
+    private function registerEloquentFactories(Application $app)
+    {
+        $factory = $app->make(Factory::class);
+        $factory->load(__DIR__ . '/../database/factories');
+        $factory->load(__DIR__ . '/../vendor/laravel/laravel/database/factories');
+    }
+
+    protected function createUser(array $attributes = [])
+    {
+        $userModel = config('sberbank-acquiring.user.model');
+        return factory($userModel)->create($attributes);
+    }
+
+    protected function createAcquiringPayment(array $attributes = []): AcquiringPayment
+    {
+        return factory(AcquiringPayment::class)->create($attributes);
+    }
+
+    protected function createSberbankPayment(array $attributes = []): SberbankPayment
+    {
+        return factory(SberbankPayment::class)->create($attributes);
+    }
+
+    protected function createApplePayPayment(array $attributes = []): ApplePayPayment
+    {
+        return factory(ApplePayPayment::class)->create($attributes);
+    }
+
+    protected function createSamsungPayPayment(array $attributes = []): SamsungPayPayment
+    {
+        return factory(SamsungPayPayment::class)->create($attributes);
+    }
+
+    protected function createGooglePayPayment(array $attributes = []): GooglePayPayment
+    {
+        return factory(GooglePayPayment::class)->create($attributes);
+    }
+
+    protected function createAcquiringPaymentOperation(array $attributes = []): AcquiringPaymentOperation
+    {
+        return factory(AcquiringPaymentOperation::class)->create($attributes);
     }
 }

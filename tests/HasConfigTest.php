@@ -2,10 +2,10 @@
 
 namespace Avlyalin\SberbankAcquiring\Tests;
 
-use Avlyalin\SberbankAcquiring\Database\HasTableName;
+use Avlyalin\SberbankAcquiring\Database\HasConfig;
 use Illuminate\Support\Facades\Config;
 
-class HasTableNameTest extends TestCase
+class HasConfigTest extends TestCase
 {
     /**
      * @test
@@ -15,7 +15,7 @@ class HasTableNameTest extends TestCase
         $expectedTableName = 'some_payments_table';
         Config::set('sberbank-acquiring.table_names.payment', $expectedTableName);
 
-        $mock = $this->getMockForTrait(HasTableName::class);
+        $mock = $this->getMockForTrait(HasConfig::class);
 
         $this->assertEquals($expectedTableName, $mock->getTableName('payment'));
     }
@@ -28,7 +28,7 @@ class HasTableNameTest extends TestCase
         $expectedTableName = 'some_payments_table';
         Config::set('sberbank-acquiring.table_names.bad_key', $expectedTableName);
 
-        $mock = $this->getMockForTrait(HasTableName::class);
+        $mock = $this->getMockForTrait(HasConfig::class);
 
         $this->expectException(\Exception::class);
         $mock->getTableName('payment');

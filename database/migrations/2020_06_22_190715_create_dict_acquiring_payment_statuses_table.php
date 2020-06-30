@@ -1,6 +1,6 @@
 <?php
 
-use Avlyalin\SberbankAcquiring\Database\HasTableName;
+use Avlyalin\SberbankAcquiring\Database\HasConfig;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class CreateDictAcquiringPaymentStatusesTable extends Migration
 {
-    use HasTableName;
+    use HasConfig;
 
     /**
      * Run the migrations.
@@ -36,9 +36,7 @@ class CreateDictAcquiringPaymentStatusesTable extends Migration
                 ['name' => 'Зарегистрирован', 'full_name' => 'Платеж зарегистрирован, но не оплачен', 'bank_id' => 0],
                 ['name' => 'Захолдирован', 'full_name' => 'Предавторизованная сумма захолдирована', 'bank_id' => 1],
                 ['name' => 'Подтвержден', 'full_name' => 'Проведена полная авторизация суммы', 'bank_id' => 2],
-                ['name' => 'Запрос отмены', 'full_name' => 'Запрошена отмена авторизации', 'bank_id' => null],
                 ['name' => 'Отменен', 'full_name' => 'Авторизация отменена', 'bank_id' => 3],
-                ['name' => 'Запрос возврата', 'full_name' => 'Запрошен возврат суммы', 'bank_id' => null],
                 ['name' => 'Оформлен возврат', 'full_name' => 'По транзакции была проведена операция возврата', 'bank_id' => 4],
                 ['name' => 'ACS-авторизация', 'full_name' => 'Инициирована авторизация через ACS банка-эмитента', 'bank_id' => 5],
                 ['name' => 'Отклонен', 'full_name' => 'Авторизация отклонена', 'bank_id' => 6],
