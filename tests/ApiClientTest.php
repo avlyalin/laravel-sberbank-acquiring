@@ -19,7 +19,7 @@ class ApiClientTest extends TestCase
     public function it_throws_an_exception_when_username_password_and_token_are_omitted()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $client = new ApiClient([]);
+        $client = new ApiClient();
         $client->requestWithAuth(ClientInterface::PATH_REGISTER);
     }
 
