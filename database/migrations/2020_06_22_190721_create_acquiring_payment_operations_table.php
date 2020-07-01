@@ -30,7 +30,7 @@ class CreateAcquiringPaymentOperationsTable extends Migration
                 $table->unsignedBigInteger('user_id')->nullable()->comment('id пользователя-инициатора операции');
                 $table->unsignedInteger('type_id')->comment('id типа операции');
                 $table->text('request_json')->comment('JSON с данными запроса к банку');
-                $table->text('response_json')->comment('JSON с ответом от банка');
+                $table->text('response_json')->nullable()->comment('JSON с ответом от банка');
                 $table->timestamps();
 
                 $table->foreign('payment_id', "{$paymentsTableName}_payment_id_foreign")
