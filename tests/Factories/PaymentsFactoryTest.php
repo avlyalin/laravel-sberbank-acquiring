@@ -36,12 +36,12 @@ class PaymentsFactoryTest extends TestCase
     {
         $acquiringPayment = $this->factory->createAcquiringPayment([
             'system_id' => DictAcquiringPaymentSystem::SBERBANK,
-            'status_id' => DictAcquiringPaymentStatus::NEW,
+            'status_id' => DictAcquiringPaymentStatus::REGISTERED,
         ]);
 
         $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
         $this->assertEquals($acquiringPayment->system_id, DictAcquiringPaymentSystem::SBERBANK);
-        $this->assertEquals($acquiringPayment->status_id, DictAcquiringPaymentStatus::NEW);
+        $this->assertEquals($acquiringPayment->status_id, DictAcquiringPaymentStatus::REGISTERED);
     }
 
     /**
