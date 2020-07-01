@@ -11,6 +11,12 @@ class AcquiringPayment extends BaseModel
 {
     protected $tableNameKey = 'payments';
 
+    protected $fillable = [
+        'bank_order_id',
+        'status_id',
+        'system_id',
+    ];
+
     /**
      * Операции по платежу
      *
