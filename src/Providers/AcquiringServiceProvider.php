@@ -6,6 +6,7 @@ use Avlyalin\SberbankAcquiring\Client\ApiClient;
 use Avlyalin\SberbankAcquiring\Client\ApiClientInterface;
 use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\Curl\CurlInterface;
+use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
 use Illuminate\Database\Eloquent\Factory;
@@ -63,6 +64,9 @@ class AcquiringServiceProvider extends ServiceProvider
     {
         $this->app->bind(CurlInterface::class, Curl::class);
         $this->app->bind(ApiClientInterface::class, ApiClient::class);
+        $this->app->singleton(PaymentsFactory::class, function ($app) {
+            return new PaymentsFactory();
+        });
         $this->app->singleton(AcquiringPaymentRepository::class, function ($app) {
             return new AcquiringPaymentRepository(new AcquiringPayment());
         });
