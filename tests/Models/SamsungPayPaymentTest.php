@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Avlyalin\SberbankAcquiring\Tests\Models;
 
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
+use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 
 class SamsungPayPaymentTest extends TestCase
@@ -17,5 +18,33 @@ class SamsungPayPaymentTest extends TestCase
         $samsungPayPayment = $this->createSamsungPayPayment();
 
         $this->assertInstanceOf(AcquiringPayment::class, $samsungPayPayment->basePayment);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_be_filled_with_sberbank_attributes()
+    {
+        $params = [
+            'orderNumber' => 'uvc124v',
+            'description' => 'operation description',
+            'language' => 'EN',
+            'additionalParameters' => ['param' => 'value'],
+            'preAuth' => 'false',
+            'clientId' => '1vc-21bvd21',
+            'ip' => '10.10.10.10',
+        ];
+        $payment = new SamsungPayPayment();
+        $payment->fillWithSberbankParams($params);
+
+        $this->assertEquals([
+            'order_number' => 'uvc124v',
+            'description' => 'operation description',
+            'language' => 'EN',
+            'additional_parameters' => "{\"param\":\"value\"}",
+            'pre_auth' => 'false',
+            'client_id' => '1vc-21bvd21',
+            'ip' => '10.10.10.10',
+        ], $payment->getAttributes());
     }
 }

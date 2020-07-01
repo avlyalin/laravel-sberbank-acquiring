@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-class SamsungPayPayment extends BaseModel implements PaymentInterface
+class SamsungPayPayment extends BasePaymentModel
 {
-    use HasBasePayment;
-
     protected $tableNameKey = 'samsung_pay_payments';
 
     public $timestamps = false;
@@ -25,5 +23,15 @@ class SamsungPayPayment extends BaseModel implements PaymentInterface
 
     protected $casts = [
         'additional_parameters' => 'array',
+    ];
+
+    protected $acquiringParamsMap = [
+        'orderNumber' => 'order_number',
+        'description' => 'description',
+        'language' => 'language',
+        'additionalParameters' => 'additional_parameters',
+        'preAuth' => 'pre_auth',
+        'clientId' => 'client_id',
+        'ip' => 'ip',
     ];
 }

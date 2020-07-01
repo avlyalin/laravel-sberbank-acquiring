@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-class SberbankPayment extends BaseModel implements PaymentInterface
+class SberbankPayment extends BasePaymentModel
 {
-    use HasBasePayment;
-
     protected $tableNameKey = 'sberbank_payments';
 
     public $timestamps = false;
@@ -33,5 +31,22 @@ class SberbankPayment extends BaseModel implements PaymentInterface
 
     protected $casts = [
         'json_params' => 'array',
+    ];
+
+    protected $acquiringParamsMap = [
+        'orderNumber' => 'order_number',
+        'amount' => 'amount',
+        'currency' => 'currency',
+        'returnUrl' => 'return_url',
+        'failUrl' => 'fail_url',
+        'description' => 'description',
+        'language' => 'language',
+        'clientId' => 'client_id',
+        'pageView' => 'page_view',
+        'merchantLogin' => 'merchant_login',
+        'jsonParams' => 'json_params',
+        'sessionTimeoutSecs' => 'session_timeout_secs',
+        'expirationDate' => 'expiration_date',
+        'features' => 'features',
     ];
 }
