@@ -32,7 +32,6 @@ class CreateDictAcquiringPaymentStatusesTable extends Migration
 
         DB::table($tableName)->insert(
             [
-                ['name' => 'Новый', 'full_name' => 'Платеж не зарегистрирован в системе банка', 'bank_id' => null],
                 ['name' => 'Зарегистрирован', 'full_name' => 'Платеж зарегистрирован, но не оплачен', 'bank_id' => 0],
                 ['name' => 'Захолдирован', 'full_name' => 'Предавторизованная сумма захолдирована', 'bank_id' => 1],
                 ['name' => 'Подтвержден', 'full_name' => 'Проведена полная авторизация суммы', 'bank_id' => 2],
