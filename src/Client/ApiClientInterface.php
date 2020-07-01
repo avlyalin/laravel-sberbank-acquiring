@@ -2,7 +2,7 @@
 
 namespace Avlyalin\SberbankAcquiring\Client;
 
-interface ClientInterface
+interface ApiClientInterface
 {
     public const URI_PROD = 'https://securepayments.sberbank.ru';
     public const URI_TEST = 'https://3dsec.sberbank.ru';

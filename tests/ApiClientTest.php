@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Avlyalin\SberbankAcquiring\Tests;
 
 use Avlyalin\SberbankAcquiring\Client\ApiClient;
-use Avlyalin\SberbankAcquiring\Client\ClientInterface;
+use Avlyalin\SberbankAcquiring\Client\ApiClientInterface;
 use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\HttpClient;
 use Avlyalin\SberbankAcquiring\Client\HttpClientInterface;
@@ -20,7 +20,7 @@ class ApiClientTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $client = new ApiClient();
-        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
+        $client->requestWithAuth(ApiClientInterface::PATH_REGISTER);
     }
 
     /**
@@ -35,7 +35,7 @@ class ApiClientTest extends TestCase
             'password' => 'test_password',
             'httpClient' => $httpClient,
         ]);
-        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
+        $client->requestWithAuth(ApiClientInterface::PATH_REGISTER);
     }
 
     /**
@@ -52,7 +52,7 @@ class ApiClientTest extends TestCase
             'password' => 'test_password',
             'httpClient' => $httpClient,
         ]);
-        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
+        $client->requestWithAuth(ApiClientInterface::PATH_REGISTER);
     }
 
     /**
@@ -68,7 +68,7 @@ class ApiClientTest extends TestCase
             'token' => 'auth_token',
             'httpClient' => $httpClient,
         ]);
-        $client->requestWithAuth(ClientInterface::PATH_REGISTER);
+        $client->requestWithAuth(ApiClientInterface::PATH_REGISTER);
     }
 
     /**
@@ -86,7 +86,7 @@ class ApiClientTest extends TestCase
             'httpClient' => $httpClient,
         ]);
         $client->requestWithAuth(
-            ClientInterface::PATH_REGISTER,
+            ApiClientInterface::PATH_REGISTER,
             [
                 'userName' => 'params_username',
                 'password' => 'params_password',
@@ -116,7 +116,7 @@ class ApiClientTest extends TestCase
             'httpClient' => $httpClient,
         ]);
         $client->requestWithAuth(
-            ClientInterface::PATH_REGISTER,
+            ApiClientInterface::PATH_REGISTER,
             [
                 'token' => 'params_token',
             ]
@@ -137,7 +137,7 @@ class ApiClientTest extends TestCase
             'httpClient' => $httpClient,
         ]);
         $client->requestWithAuth(
-            ClientInterface::PATH_REGISTER,
+            ApiClientInterface::PATH_REGISTER,
             [
                 'token' => 'params_token',
             ]
@@ -184,7 +184,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REGISTER &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REGISTER &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['amount'] === 1500 &&
                 $data['returnUrl'] === 'http://return-url.test/api/success'
@@ -214,7 +214,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REGISTER &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REGISTER &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
                 $data['currency'] === Currency::EUR &&
@@ -260,7 +260,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REGISTER_PRE_AUTH &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REGISTER_PRE_AUTH &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['amount'] === 2000 &&
                 $data['returnUrl'] === 'http://return-url.test/api/success'
@@ -290,7 +290,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REGISTER_PRE_AUTH &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REGISTER_PRE_AUTH &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
                 $data['currency'] === Currency::EUR &&
@@ -336,7 +336,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_DEPOSIT &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_DEPOSIT &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['orderId'] === '8n421v' &&
                 $data['amount'] === 2100
@@ -363,7 +363,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_DEPOSIT &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_DEPOSIT &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['orderId'] === '8n421v' &&
                 $data['amount'] === 2100 &&
@@ -397,7 +397,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REVERSE &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REVERSE &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['orderId'] === '5mvc41vc'
             ) {
@@ -423,7 +423,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REVERSE &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REVERSE &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'IT' &&
                 $data['orderId'] === 'vc91mx' &&
@@ -457,7 +457,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REFUND &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REFUND &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['orderId'] === '5mvc41vc' &&
                 $data['amount'] === 500
@@ -485,7 +485,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_REFUND &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_REFUND &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['orderId'] === 'b9c041v' &&
                 $data['amount'] === 500 &&
@@ -533,7 +533,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_ORDER_STATUS_EXTENDED &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_ORDER_STATUS_EXTENDED &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['orderId'] === '1m9cm12'
             ) {
@@ -559,7 +559,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_ORDER_STATUS_EXTENDED &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_ORDER_STATUS_EXTENDED &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['orderNumber'] === '12mcxsm5'
             ) {
@@ -586,7 +586,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_ORDER_STATUS_EXTENDED &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_ORDER_STATUS_EXTENDED &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'RU' &&
                 $data['orderId'] === '129m41' &&
@@ -628,7 +628,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_APPLE_PAY &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_APPLE_PAY &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['merchant'] === 'merchant_login_123' &&
                 $data['paymentToken'] === '12xco94mvcxt53213_dasde1x'
@@ -655,7 +655,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_APPLE_PAY &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_APPLE_PAY &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['language'] === 'RU' &&
                 $data['merchant'] === 'merchant_login_142d' &&
@@ -693,7 +693,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_SAMSUNG_PAY &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_SAMSUNG_PAY &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['merchant'] === 'merchant_login_cx123m' &&
                 $data['paymentToken'] === '123m71_41_n12n3'
@@ -720,7 +720,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_SAMSUNG_PAY &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_SAMSUNG_PAY &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
                 $data['currencyCode'] === Currency::USD &&
@@ -763,7 +763,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GOOGLE_PAY &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GOOGLE_PAY &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['merchant'] === 'merchant_login_bv81m' &&
                 $data['paymentToken'] === '9m120vcnd-543m' &&
@@ -797,7 +797,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GOOGLE_PAY &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GOOGLE_PAY &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['language'] === 'EN' &&
                 $data['currencyCode'] === Currency::USD &&
@@ -857,7 +857,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_RECEIPT_STATUS &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_RECEIPT_STATUS &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['orderId'] === '9nv352-mda1'
             ) {
@@ -886,7 +886,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_RECEIPT_STATUS &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_RECEIPT_STATUS &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['uuid'] === '8213m,-53215-51nmvc-123v'
             ) {
@@ -915,7 +915,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_RECEIPT_STATUS &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_RECEIPT_STATUS &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['uuid'] === '2139vm-bv-52vc-124bc' &&
                 $data['orderId'] === 'v98l,91m6n532' &&
@@ -955,7 +955,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_BIND &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_BIND &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['bindingId'] === '8n518ncsdf'
             ) {
@@ -981,7 +981,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_BIND &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_BIND &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['bindingId'] === '9m41v0bcdm1' &&
                 $headers === [['content-type' => 'text/plain']]
@@ -1013,7 +1013,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_UNBIND &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_UNBIND &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['bindingId'] === '19vcm53012'
             ) {
@@ -1039,7 +1039,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_UNBIND &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_UNBIND &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['bindingId'] === '75b4b325' &&
                 $headers === [['content-type' => 'text/plain']]
@@ -1071,7 +1071,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_BINDINGS &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_BINDINGS &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['clientId'] === '91-bvc56432'
             ) {
@@ -1097,7 +1097,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_BINDINGS &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_BINDINGS &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['clientId'] === '8vcm53-1234cf' &&
                 $headers === [['content-type' => 'text/plain']]
@@ -1129,7 +1129,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_GET_BINDINGS_BY_CARD_OR_ID &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_GET_BINDINGS_BY_CARD_OR_ID &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['pan'] === '01mv8n123cx' &&
                 $data['language'] === 'DE' &&
@@ -1165,7 +1165,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_EXTEND_BINDING &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_EXTEND_BINDING &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['bindingId'] === '10vmxs121' &&
                 $data['newExpiry'] === 202201
@@ -1192,7 +1192,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_EXTEND_BINDING &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_EXTEND_BINDING &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['bindingId'] === '912nvc82112' &&
                 $data['newExpiry'] === 202012 &&
@@ -1230,7 +1230,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_VERIFY_ENROLLMENT &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_VERIFY_ENROLLMENT &&
                 $method === HttpClientInterface::METHOD_POST &&
                 $data['pan'] === '5555-4151-512-5111'
             ) {
@@ -1256,7 +1256,7 @@ class ApiClientTest extends TestCase
     {
         $httpClient = $this->getHttpClientMock(function ($uri, $method, $data, $headers) {
             if (
-                $uri === "https://some-test-uri.com/root-path" . ClientInterface::PATH_VERIFY_ENROLLMENT &&
+                $uri === "https://some-test-uri.com/root-path" . ApiClientInterface::PATH_VERIFY_ENROLLMENT &&
                 $method === HttpClientInterface::METHOD_GET &&
                 $data['pan'] === '5555-4444-3333-2222' &&
                 $headers === [['content-type' => 'application/json']]

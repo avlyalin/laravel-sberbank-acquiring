@@ -3,6 +3,7 @@
 namespace Avlyalin\SberbankAcquiring\Providers;
 
 use Avlyalin\SberbankAcquiring\Client\ApiClient;
+use Avlyalin\SberbankAcquiring\Client\ApiClientInterface;
 use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\Curl\CurlInterface;
 use Illuminate\Database\Eloquent\Factory;
@@ -59,6 +60,6 @@ class AcquiringServiceProvider extends ServiceProvider
     private function registerBindings()
     {
         $this->app->bind(CurlInterface::class, Curl::class);
-        $this->app->bind(ClientInterface::class, ApiClient::class);
+        $this->app->bind(ApiClientInterface::class, ApiClient::class);
     }
 }
