@@ -2,7 +2,7 @@
 
 namespace Avlyalin\SberbankAcquiring\Tests;
 
-use Avlyalin\SberbankAcquiring\AcquiringServiceProvider;
+use Avlyalin\SberbankAcquiring\Providers\AcquiringServiceProvider;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperation;
 use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;

@@ -59,7 +59,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Avlyalin\\SberbankAcquiring\\AcquiringServiceProvider"
+                "Avlyalin\\SberbankAcquiring\\Providers\\AcquiringServiceProvider"
             ]
         }
     }
