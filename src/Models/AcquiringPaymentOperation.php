@@ -2,11 +2,8 @@
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-use Avlyalin\SberbankAcquiring\Database\HasConfig;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class AcquiringPaymentOperation extends BaseModel
 {
@@ -15,6 +12,14 @@ class AcquiringPaymentOperation extends BaseModel
     protected $casts = [
         'request_json' => 'array',
         'response_json' => 'array',
+    ];
+
+    protected $fillable = [
+        'payment_id',
+        'user_id',
+        'type_id',
+        'request_json',
+        'response_json',
     ];
 
     /**
@@ -26,9 +31,9 @@ class AcquiringPaymentOperation extends BaseModel
     public function user(): ?BelongsTo
     {
         return $this->belongsTo(
-            $this->getConfigValueByKey('user.model'),
+            $this->getConfigParam('user.model'),
             'user_id',
-            $this->getConfigValueByKey('user.primary_key')
+            $this->getConfigParam('user.primary_key')
         );
     }
 
