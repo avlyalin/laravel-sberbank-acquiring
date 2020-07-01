@@ -1,7 +1,8 @@
 <?php
 
-namespace Avlyalin\SberbankAcquiring\Tests;
+namespace Avlyalin\SberbankAcquiring\Tests\Traits;
 
+use Avlyalin\SberbankAcquiring\Tests\TestCase;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Illuminate\Support\Facades\Config;
 
