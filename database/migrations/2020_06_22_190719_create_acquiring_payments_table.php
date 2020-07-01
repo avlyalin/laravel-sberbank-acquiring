@@ -24,7 +24,7 @@ class CreateAcquiringPaymentsTable extends Migration
 
         Schema::create($tableName, function (Blueprint $table) use ($tableName, $statusesTableName, $systemsTableName) {
             $table->bigIncrements('id');
-            $table->string('bank_order_id', 36)->comment('Номер заказа в платежной системе');
+            $table->string('bank_order_id', 36)->nullable()->comment('Номер заказа в платежной системе');
             $table->unsignedInteger('status_id')->comment('id статуса заказа');
             $table->unsignedInteger('system_id')->comment('id вида платежной системы');
             $table->timestamps();
