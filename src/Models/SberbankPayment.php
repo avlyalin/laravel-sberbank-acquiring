@@ -20,6 +20,7 @@ class SberbankPayment extends BaseModel implements PaymentInterface
         'return_url',
         'fail_url',
         'description',
+        'client_id',
         'language',
         'page_view',
         'merchant_login',
