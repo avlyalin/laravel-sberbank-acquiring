@@ -60,7 +60,7 @@ class SberbankResponseTest extends TestCase
      */
     public function it_throws_exception_on_non_success_code_and_message_in_response()
     {
-        $this->expectException(OperationException::class);
+        $this->expectException(ErrorResponseException::class);
         $this->expectExceptionCode(10);
         $this->expectExceptionMessage('Error');
 
@@ -75,7 +75,7 @@ class SberbankResponseTest extends TestCase
      */
     public function it_throws_exception_on_non_success_code_and_message_in_response_2()
     {
-        $this->expectException(OperationException::class);
+        $this->expectException(ErrorResponseException::class);
         $this->expectExceptionCode(10);
         $this->expectExceptionMessage('Error');
 
@@ -90,7 +90,7 @@ class SberbankResponseTest extends TestCase
      */
     public function it_throws_exception_on_non_success_response_code_in_response()
     {
-        $this->expectException(OperationException::class);
+        $this->expectException(ErrorResponseException::class);
         $this->expectExceptionCode(10);
 
         $response = new SberbankResponse('{"orderId": "h9gmvc","formUrl":"http://some-url.com","errorCode": 10}');
@@ -102,7 +102,7 @@ class SberbankResponseTest extends TestCase
      */
     public function it_throws_exception_on_non_success_response_code_in_response_2()
     {
-        $this->expectException(OperationException::class);
+        $this->expectException(ErrorResponseException::class);
         $this->expectExceptionCode(10);
 
         $response = new SberbankResponse('{"orderId": "53mv9f","formUrl":"http://some-url.com","error": {"code": 10}}');

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Avlyalin\SberbankAcquiring\Client;
 
 use Avlyalin\SberbankAcquiring\Exceptions\JsonException;
-use Avlyalin\SberbankAcquiring\Exceptions\OperationException;
+use Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException;
 
 class SberbankResponse
 {
@@ -34,7 +34,7 @@ class SberbankResponse
      *
      * @return array
      * @throws JsonException
-     * @throws OperationException
+     * @throws ErrorResponseException
      */
     public function getFormattedResponse(): array
     {
@@ -69,7 +69,7 @@ class SberbankResponse
         unset($response['success']);
 
         if ($errorCode !== self::CODE_SUCCESS) {
-            throw new OperationException($errorMessage, $errorCode);
+            throw new ErrorResponseException($errorMessage, $errorCode);
         }
 
         return $response;

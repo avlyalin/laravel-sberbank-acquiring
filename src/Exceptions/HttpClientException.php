@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Exceptions;
 
-class HttpClientException extends \RuntimeException
+class HttpClientException extends AcquiringException
 {
 
 }

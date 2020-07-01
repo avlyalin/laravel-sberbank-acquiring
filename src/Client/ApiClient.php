@@ -303,7 +303,7 @@ class ApiClient implements ApiClientInterface
      *
      * @return array
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\OperationException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException
      */
     public function requestWithAuth(
         string $pathName,
@@ -338,7 +338,7 @@ class ApiClient implements ApiClientInterface
      *
      * @return array
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\OperationException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException
      */
     public function request(
         string $pathName,
