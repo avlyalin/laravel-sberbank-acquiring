@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-use Avlyalin\SberbankAcquiring\Database\HasConfig;
+use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseModel extends Model

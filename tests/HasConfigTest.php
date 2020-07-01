@@ -2,7 +2,7 @@
 
 namespace Avlyalin\SberbankAcquiring\Tests;
 
-use Avlyalin\SberbankAcquiring\Database\HasConfig;
+use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Illuminate\Support\Facades\Config;
 
 class HasConfigTest extends TestCase

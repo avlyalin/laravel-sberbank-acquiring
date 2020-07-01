@@ -1,6 +1,6 @@
 <?php
 
-namespace Avlyalin\SberbankAcquiring\Database;
+namespace Avlyalin\SberbankAcquiring\Traits;
 
 use Exception;
 use Illuminate\Config\Repository;
@@ -16,7 +16,7 @@ trait HasConfig
      */
     public function getTableName(string $tableNameKey): string
     {
-        return $this->getConfigValueByKey("table_names.$tableNameKey");
+        return $this->getConfigParam("table_names.$tableNameKey");
     }
 
     /**
@@ -25,7 +25,7 @@ trait HasConfig
      * @return Repository|Application|mixed
      * @throws Exception
      */
-    public function getConfigValueByKey(string $key)
+    public function getConfigParam(string $key)
     {
         $value = config("sberbank-acquiring.$key");
         if (empty($value)) {
