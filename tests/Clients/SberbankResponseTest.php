@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Avlyalin\SberbankAcquiring\Tests;
+namespace Avlyalin\SberbankAcquiring\Tests\Clients;
 
 use Avlyalin\SberbankAcquiring\Client\SberbankResponse;
 use Avlyalin\SberbankAcquiring\Exceptions\JsonException;
-use Avlyalin\SberbankAcquiring\Exceptions\OperationException;
+use Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException;
+use Avlyalin\SberbankAcquiring\Tests\TestCase;
 
 class SberbankResponseTest extends TestCase
 {

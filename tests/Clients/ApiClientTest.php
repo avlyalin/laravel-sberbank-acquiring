@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Avlyalin\SberbankAcquiring\Tests;
+namespace Avlyalin\SberbankAcquiring\Tests\Clients;
 
 use Avlyalin\SberbankAcquiring\Client\ApiClient;
 use Avlyalin\SberbankAcquiring\Client\ApiClientInterface;
@@ -10,6 +10,7 @@ use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\HttpClient;
 use Avlyalin\SberbankAcquiring\Client\HttpClientInterface;
 use Avlyalin\SberbankAcquiring\Helpers\Currency;
+use Avlyalin\SberbankAcquiring\Tests\TestCase;
 
 class ApiClientTest extends TestCase
 {
