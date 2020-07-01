@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Factories;
 
+use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperation;
 use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
 use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
 use Avlyalin\SberbankAcquiring\Models\GooglePayPayment;
@@ -14,13 +16,21 @@ class PaymentsFactory
     /**
      * @param array $attributes
      *
+     * @return AcquiringPayment
+     */
+    public function createAcquiringPayment(array $attributes = []): AcquiringPayment
+    {
+        return new AcquiringPayment($attributes);
+    }
+
+    /**
+     * @param array $attributes
+     *
      * @return SberbankPayment
      */
     public function createSberbankPayment(array $attributes = []): SberbankPayment
     {
-        $sberbankPayment = new SberbankPayment($attributes);
-        $sberbankPayment->save();
-        return $sberbankPayment;
+        return new SberbankPayment($attributes);
     }
 
     /**
@@ -30,9 +40,7 @@ class PaymentsFactory
      */
     public function createApplePayPayment(array $attributes = []): ApplePayPayment
     {
-        $applePayPayment = new ApplePayPayment($attributes);
-        $applePayPayment->save();
-        return $applePayPayment;
+        return new ApplePayPayment($attributes);
     }
 
     /**
@@ -42,9 +50,7 @@ class PaymentsFactory
      */
     public function createSamsungPayPayment(array $attributes = []): SamsungPayPayment
     {
-        $samsungPayPayment = new SamsungPayPayment($attributes);
-        $samsungPayPayment->save();
-        return $samsungPayPayment;
+        return new SamsungPayPayment($attributes);
     }
 
     /**
@@ -54,8 +60,16 @@ class PaymentsFactory
      */
     public function createGooglePayPayment(array $attributes = []): GooglePayPayment
     {
-        $googlePayPayment = new GooglePayPayment($attributes);
-        $googlePayPayment->save();
-        return $googlePayPayment;
+        return new GooglePayPayment($attributes);
+    }
+
+    /**
+     * @param array $attributes
+     *
+     * @return AcquiringPaymentOperation
+     */
+    public function createPaymentOperation(array $attributes = []): AcquiringPaymentOperation
+    {
+        return new AcquiringPaymentOperation($attributes);
     }
 }
