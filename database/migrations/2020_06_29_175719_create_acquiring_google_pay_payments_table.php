@@ -30,7 +30,7 @@ class CreateAcquiringGooglePayPaymentsTable extends Migration
             $table->string('additional_parameters', 1024)->nullable()->comment('Дополнительные параметры');
             $table->string('pre_auth', 5)->nullable()
                 ->comment('Параметр, определяющий необходимость предварительной авторизации');
-            $table->string('client_id', 512)->nullable()->comment('Номер (идентификатор) клиента в системе продавца');
+            $table->string('client_id', 255)->nullable()->comment('Номер (идентификатор) клиента в системе продавца');
             $table->string('ip', 39)->nullable()->comment('IP-адрес покупателя');
             $table->unsignedBigInteger('amount')->unsigned()->comment('Сумма платежа в минимальных единицах валюты');
             $table->unsignedSmallInteger('currency_code')->nullable()->comment('Цифровой код валюты платежа ISO 4217');
