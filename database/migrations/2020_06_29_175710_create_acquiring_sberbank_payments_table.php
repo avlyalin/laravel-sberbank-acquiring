@@ -34,7 +34,7 @@ class CreateAcquiringSberbankPaymentsTable extends Migration
             $table->string('page_view', 20)->nullable()->comment('Страница платежного интерфейса');
             $table->string('json_params', 1024)->nullable()->comment('Дополнительные параметры в формате JSON');
             $table->string('session_timeout_secs', 9)->nullable()->comment('Продолжительность заказа в секундах');
-            $table->dateTime('expiration_date')->nullable()->comment('Дата и время окончания жизни заказа');
+            $table->string('expiration_date')->nullable()->comment('Дата и время окончания жизни заказа');
             $table->string('features', 255)->nullable()->comment('Дополнительные параметры операции');
             $table->string('bank_form_url', 512)->nullable()->comment('URL платежной формы');
             $table->timestamps();
