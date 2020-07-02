@@ -189,6 +189,25 @@ class ClientTest extends TestCase
             ['errorCode' => 0, 'orderId' => '5vc013cx', 'formUrl' => 'http://pay.test.test/17nvcd'],
             DictAcquiringPaymentStatus::REGISTERED,
         ];
+
+        yield [1000, 'http://pay.test/test-pay', [
+            'orderNumber' => '0vcxn12',
+            'currency' => Currency::RUB,
+            'failUrl' => 'http://pay-test.com/api/error',
+            'description' => 'order description',
+            'language' => 'RU',
+            'clientId' => '',
+            'pageView' => 'DESKTOP',
+            'jsonParams' => [],
+            'sessionTimeoutSecs' => 1200,
+            'expirationDate' => '',
+            'features' => 'order features',
+        ], [
+            'token' => 'test_token',
+        ],
+            ['errorCode' => 10, 'orderId' => '5vc013cx', 'formUrl' => 'http://pay.test.test/bver4'],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
     }
 
     private function mockApiClient(string $method, callable $expectedArgs, array $returnValue)
