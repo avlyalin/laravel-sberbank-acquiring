@@ -4,8 +4,11 @@ namespace Avlyalin\SberbankAcquiring\Providers;
 
 use Avlyalin\SberbankAcquiring\Client\ApiClient;
 use Avlyalin\SberbankAcquiring\Client\ApiClientInterface;
+use Avlyalin\SberbankAcquiring\Client\Client;
 use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\Curl\CurlInterface;
+use Avlyalin\SberbankAcquiring\Client\HttpClient;
+use Avlyalin\SberbankAcquiring\Client\HttpClientInterface;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
@@ -63,12 +66,17 @@ class AcquiringServiceProvider extends ServiceProvider
     private function registerBindings()
     {
         $this->app->bind(CurlInterface::class, Curl::class);
-        $this->app->bind(ApiClientInterface::class, ApiClient::class);
+        $this->app->bind(HttpClientInterface::class, HttpClient::class);
+        $this->app->bind(ApiClientInterface::class, function ($app) {
+            $httpClient = $app->make(HttpClientInterface::class);
+            return new ApiClient(['httpClient' => $httpClient]);
+        });
         $this->app->singleton(PaymentsFactory::class, function ($app) {
             return new PaymentsFactory();
         });
         $this->app->singleton(AcquiringPaymentRepository::class, function ($app) {
             return new AcquiringPaymentRepository(new AcquiringPayment());
         });
+        $this->app->bind(Client::class, Client::class);
     }
 }
