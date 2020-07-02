@@ -33,7 +33,11 @@ class Client
     private $acquiringPaymentRepository;
 
     /**
-     * @inheritDoc
+     * Client constructor.
+     *
+     * @param ApiClientInterface $apiClient
+     * @param PaymentsFactory $paymentsFactory
+     * @param AcquiringPaymentRepository $acquiringPaymentRepository
      */
     public function __construct(
         ApiClientInterface $apiClient,
