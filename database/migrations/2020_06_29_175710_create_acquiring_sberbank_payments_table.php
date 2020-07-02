@@ -32,7 +32,6 @@ class CreateAcquiringSberbankPaymentsTable extends Migration
             $table->string('language', 2)->nullable()->comment('Язык в кодировке ISO 639-1');
             $table->string('client_id', 255)->nullable()->comment('Номер (идентификатор) клиента в системе продавца');
             $table->string('page_view', 20)->nullable()->comment('Страница платежного интерфейса');
-            $table->string('merchant_login', 255)->nullable()->comment('Логин дочернего мерчанта');
             $table->string('json_params', 1024)->nullable()->comment('Дополнительные параметры в формате JSON');
             $table->string('session_timeout_secs', 9)->nullable()->comment('Продолжительность заказа в секундах');
             $table->dateTime('expiration_date')->nullable()->comment('Дата и время окончания жизни заказа');

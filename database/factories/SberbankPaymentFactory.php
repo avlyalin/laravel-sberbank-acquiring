@@ -18,7 +18,6 @@ $factory->define(SberbankPayment::class, function (Faker $faker) {
         'language' => $faker->languageCode,
         'client_id' => Str::random(20),
         'page_view' => $faker->randomElement(['MOBILE', 'DESKTOP']),
-        'merchant_login' => Str::random(10),
         'json_params' => json_encode([$faker->word => $faker->word, $faker->word => $faker->word]),
         'session_timeout_secs' => $faker->randomNumber(9),
         'expiration_date' => $faker->dateTimeBetween('+1 hour', '+2 hour'),
