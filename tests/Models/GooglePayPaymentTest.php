@@ -16,7 +16,11 @@ class GooglePayPaymentTest extends TestCase
      */
     public function it_has_base_payment_relation()
     {
-        $googlePayPayment = $this->createGooglePayPayment();
+        $acquiringPayment = $this->createAcquiringPayment();
+        $googlePayPayment = $this->createSberbankPayment();
+        $acquiringPayment->payment()->associate($googlePayPayment);
+        $acquiringPayment->save();
+
 
         $this->assertInstanceOf(AcquiringPayment::class, $googlePayPayment->basePayment);
     }

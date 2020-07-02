@@ -11,7 +11,6 @@ class SberbankPayment extends BasePaymentModel
     public $timestamps = false;
 
     protected $fillable = [
-        'payment_id',
         'order_number',
         'amount',
         'currency',

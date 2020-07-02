@@ -11,7 +11,6 @@ class GooglePayPayment extends BasePaymentModel
     public $timestamps = false;
 
     protected $fillable = [
-        'payment_id',
         'order_number',
         'description',
         'language',

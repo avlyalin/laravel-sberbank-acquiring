@@ -16,7 +16,10 @@ class SberbankPaymentTest extends TestCase
      */
     public function it_has_base_payment_relation()
     {
+        $acquiringPayment = $this->createAcquiringPayment();
         $sberbankPayment = $this->createSberbankPayment();
+        $acquiringPayment->payment()->associate($sberbankPayment);
+        $acquiringPayment->save();
 
         $this->assertInstanceOf(AcquiringPayment::class, $sberbankPayment->basePayment);
     }

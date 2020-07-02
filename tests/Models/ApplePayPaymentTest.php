@@ -15,7 +15,10 @@ class ApplePayPaymentTest extends TestCase
      */
     public function it_has_base_payment_relation()
     {
+        $acquiringPayment = $this->createAcquiringPayment();
         $applePayPayment = $this->createApplePayPayment();
+        $acquiringPayment->payment()->associate($applePayPayment);
+        $acquiringPayment->save();
 
         $this->assertInstanceOf(AcquiringPayment::class, $applePayPayment->basePayment);
     }

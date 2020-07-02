@@ -66,9 +66,9 @@ class TestCase extends Orchestra
         return factory($userModel)->create($attributes);
     }
 
-    protected function createAcquiringPayment(array $attributes = []): AcquiringPayment
+    protected function createAcquiringPayment(array $attributes = [], ...$states): AcquiringPayment
     {
-        return factory(AcquiringPayment::class)->create($attributes);
+        return factory(AcquiringPayment::class)->states($states)->create($attributes);
     }
 
     protected function createSberbankPayment(array $attributes = []): SberbankPayment

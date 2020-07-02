@@ -27,6 +27,7 @@ class CreateAcquiringPaymentsTable extends Migration
             $table->string('bank_order_id', 36)->nullable()->comment('Номер заказа в платежной системе');
             $table->unsignedInteger('status_id')->comment('id статуса заказа');
             $table->unsignedInteger('system_id')->comment('id вида платежной системы');
+            $table->morphs('payment', 'payment_type_payment_id_index');
             $table->timestamps();
 
             $table->foreign('status_id', "{$tableName}_status_id_foreign")
@@ -56,6 +57,7 @@ class CreateAcquiringPaymentsTable extends Migration
         if (DB::getDriverName() !== 'sqlite') {
             Schema::table($tableName, function (Blueprint $table) use ($statusesTableName) {
                 $table->dropForeign("{$statusesTableName}_status_id_foreign");
+                $table->dropIndex('payment_type_payment_id_index');
             });
         }
         Schema::dropIfExists($tableName);

@@ -9,7 +9,6 @@ use Faker\Generator as Faker;
 
 $factory->define(ApplePayPayment::class, function (Faker $faker) {
     return [
-        'payment_id' => factory(AcquiringPayment::class)->create()->id,
         'order_number' => Str::random(36),
         'description' => $faker->sentence,
         'language' => $faker->languageCode,

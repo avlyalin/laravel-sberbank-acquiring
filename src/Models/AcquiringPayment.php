@@ -6,6 +6,7 @@ namespace Avlyalin\SberbankAcquiring\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AcquiringPayment extends BaseModel
 {
@@ -15,6 +16,8 @@ class AcquiringPayment extends BaseModel
         'bank_order_id',
         'status_id',
         'system_id',
+        'payment_type',
+        'payment_id',
     ];
 
     /**
@@ -45,5 +48,15 @@ class AcquiringPayment extends BaseModel
     public function status(): BelongsTo
     {
         return $this->belongsTo(DictAcquiringPaymentStatus::class, 'status_id', 'id');
+    }
+
+    /**
+     * Модель платежа
+     *
+     * @return MorphTo
+     */
+    public function payment(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

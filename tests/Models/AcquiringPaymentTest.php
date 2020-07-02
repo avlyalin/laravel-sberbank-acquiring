@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Tests\Models;
 
+use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
+use Avlyalin\SberbankAcquiring\Models\GooglePayPayment;
+use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
+use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 
 class AcquiringPaymentTest extends TestCase
@@ -40,5 +44,49 @@ class AcquiringPaymentTest extends TestCase
         $acquiringPayment = $this->createAcquiringPayment();
 
         $this->assertInstanceOf(DictAcquiringPaymentStatus::class, $acquiringPayment->status);
+    }
+
+    /**
+     * @test
+     */
+    public function it_has_sberbank_payment_morph_relation()
+    {
+        $acquiringPayment = $this->createAcquiringPayment([]);
+
+        $payment = $acquiringPayment->payment;
+        $this->assertInstanceOf(SberbankPayment::class, $payment);
+    }
+
+    /**
+     * @test
+     */
+    public function it_has_apple_pay_payment_morph_relation()
+    {
+        $acquiringPayment = $this->createAcquiringPayment([], 'applePay');
+
+        $payment = $acquiringPayment->payment;
+        $this->assertInstanceOf(ApplePayPayment::class, $payment);
+    }
+
+    /**
+     * @test
+     */
+    public function it_has_samsung_pay_payment_morph_relation()
+    {
+        $acquiringPayment = $this->createAcquiringPayment([], 'samsungPay');
+
+        $payment = $acquiringPayment->payment;
+        $this->assertInstanceOf(SamsungPayPayment::class, $payment);
+    }
+
+    /**
+     * @test
+     */
+    public function it_has_google_pay_payment_morph_relation()
+    {
+        $acquiringPayment = $this->createAcquiringPayment([], 'googlePay');
+
+        $payment = $acquiringPayment->payment;
+        $this->assertInstanceOf(GooglePayPayment::class, $payment);
     }
 }

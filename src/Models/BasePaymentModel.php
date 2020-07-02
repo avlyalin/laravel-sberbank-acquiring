@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 abstract class BasePaymentModel extends BaseModel
 {
@@ -18,11 +18,11 @@ abstract class BasePaymentModel extends BaseModel
     /**
      * Базовая модель платежа
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function basePayment(): BelongsTo
+    public function basePayment(): MorphOne
     {
-        return $this->belongsTo(AcquiringPayment::class, 'payment_id', 'id');
+        return $this->morphOne(AcquiringPayment::class, 'payment');
     }
 
     /**

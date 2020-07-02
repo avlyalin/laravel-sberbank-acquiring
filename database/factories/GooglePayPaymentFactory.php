@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 
 $factory->define(GooglePayPayment::class, function (Faker $faker) {
     return [
-        'payment_id' => factory(AcquiringPayment::class)->create()->id,
         'order_number' => Str::random(36),
         'description' => $faker->sentence,
         'language' => $faker->languageCode,

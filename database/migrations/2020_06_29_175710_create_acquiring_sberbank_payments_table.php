@@ -23,7 +23,6 @@ class CreateAcquiringSberbankPaymentsTable extends Migration
 
         Schema::create($tableName, function (Blueprint $table) use ($tableName, $basePaymentsTableName) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('payment_id')->comment('id в базовой таблице платежей');
             $table->string('order_number', 32)->nullable()->comment('Номер заказа');
             $table->unsignedBigInteger('amount')->unsigned()->comment('Сумма платежа в минимальных единицах валюты');
             $table->unsignedSmallInteger('currency')->nullable()->comment('Код валюты платежа ISO 4217');
@@ -40,12 +39,6 @@ class CreateAcquiringSberbankPaymentsTable extends Migration
             $table->string('features', 255)->nullable()->comment('Дополнительные параметры операции');
             $table->string('bank_form_url', 512)->nullable()->comment('URL платежной формы');
             $table->timestamps();
-
-            $table->foreign('payment_id', "{$tableName}_payment_id_foreign")
-                ->references('id')
-                ->on($basePaymentsTableName)
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
     }
 
@@ -58,12 +51,6 @@ class CreateAcquiringSberbankPaymentsTable extends Migration
     public function down()
     {
         $tableName = $this->getTableName('payments');
-        $statusesTableName = $this->getTableName('payments');
-        if (DB::getDriverName() !== 'sqlite') {
-            Schema::table($tableName, function (Blueprint $table) use ($statusesTableName) {
-                $table->dropForeign("{$statusesTableName}_status_id_foreign");
-            });
-        }
         Schema::dropIfExists($tableName);
     }
 }
