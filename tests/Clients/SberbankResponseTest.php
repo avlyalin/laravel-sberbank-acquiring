@@ -179,7 +179,7 @@ class SberbankResponseTest extends TestCase
     public function get_error_message_returns_message_2()
     {
         $response = new SberbankResponse(
-            '{"orderId": "f91ca","formUrl":"http://some-url.com","error":{"code":20, "message":"error!"},"success":true}'
+            '{"orderId": "f91ca","formUrl":"http://some-url.com","error":{"code":2, "message":"error!"},"success":true}'
         );
 
         $this->assertEquals('error!', $response->getErrorMessage());
