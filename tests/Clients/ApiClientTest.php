@@ -205,7 +205,12 @@ class ApiClientTest extends TestCase
         $this->assertEquals([
             'orderId' => 'f5vd34',
             'formUrl' => 'http://pay.test-pay.test?id=v44gds',
-        ], $response);
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderId' => 'f5vd34',
+            'formUrl' => 'http://pay.test-pay.test?id=v44gds',
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -251,7 +256,12 @@ class ApiClientTest extends TestCase
         $this->assertEquals([
             'orderId' => '5bc91mcx',
             'formUrl' => 'http://pay.test-pay.test?id=bv5d16',
-        ], $response);
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderId' => '5bc91mcx',
+            'formUrl' => 'http://pay.test-pay.test?id=bv5d16',
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -281,7 +291,12 @@ class ApiClientTest extends TestCase
         $this->assertEquals([
             'orderId' => '9n21cx',
             'formUrl' => 'http://pay.test-pay.test?id=gb73wc',
-        ], $response);
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderId' => '9n21cx',
+            'formUrl' => 'http://pay.test-pay.test?id=gb73wc',
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -327,7 +342,12 @@ class ApiClientTest extends TestCase
         $this->assertEquals([
             'orderId' => 'v743vcx',
             'formUrl' => 'http://pay.test-pay.test?id=6r5evc',
-        ], $response);
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderId' => 'v743vcx',
+            'formUrl' => 'http://pay.test-pay.test?id=6r5evc',
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -354,7 +374,8 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->deposit('8n421v', 2100);
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -388,7 +409,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/plain']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -414,7 +436,8 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->reverse('5mvc41vc');
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -448,7 +471,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/plain']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -475,7 +499,8 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->refund('5mvc41vc', 500);
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -510,7 +535,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'application/json']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -550,7 +576,15 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->getOrderStatusExtended(['orderId' => '1m9cm12']);
 
-        $this->assertEquals(['orderStatus' => 0, 'amount' => 1000], $response);
+        $this->assertEquals([
+            'orderStatus' => 0,
+            'amount' => 1000,
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderStatus' => 0,
+            'amount' => 1000,
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -576,7 +610,15 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->getOrderStatusExtended(['orderNumber' => '12mcxsm5']);
 
-        $this->assertEquals(['orderStatus' => 1, 'amount' => 5000], $response);
+        $this->assertEquals([
+            'orderStatus' => 1,
+            'amount' => 5000,
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderStatus' => 1,
+            'amount' => 5000,
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -618,7 +660,16 @@ class ApiClientTest extends TestCase
                 'amount' => 5000,
                 'orderDescription' => "order description",
             ],
-            $response
+            $response->getFormattedResponseArray()
+        );
+        $this->assertEquals(
+            [
+                'orderStatus' => 2,
+                'amount' => 5000,
+                'orderDescription' => "order description",
+                'errorCode' => 0,
+            ],
+            $response->getResponseArray()
         );
     }
 
@@ -646,7 +697,12 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->payWithApplePay('merchant_login_123', '12xco94mvcxt53213_dasde1x');
 
-        $this->assertEquals(['data' => ['orderId' => '21cx1421']], $response);
+        $this->assertEquals(['data' => ['orderId' => '21cx1421']], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'data' => ['orderId' => '21cx1421'],
+            'error' => ['code' => 0],
+            'success' => true,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -684,7 +740,12 @@ class ApiClientTest extends TestCase
             ]
         );
 
-        $this->assertEquals(['data' => ['orderId' => '1nmxz9vm+412']], $response);
+        $this->assertEquals(['data' => ['orderId' => '1nmxz9vm+412']], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'data' => ['orderId' => '1nmxz9vm+412'],
+            'error' => ['code' => 0],
+            'success' => true,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -711,7 +772,12 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->payWithSamsungPay('merchant_login_cx123m', '123m71_41_n12n3');
 
-        $this->assertEquals(['data' => ['orderId' => 'mv9n1242,vcx']], $response);
+        $this->assertEquals(['data' => ['orderId' => 'mv9n1242,vcx']], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'data' => ['orderId' => 'mv9n1242,vcx'],
+            'error' => ['code' => 0],
+            'success' => true,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -754,7 +820,12 @@ class ApiClientTest extends TestCase
             [['content-type' => 'application/json']]
         );
 
-        $this->assertEquals(['data' => ['orderId' => 'mv81m-u7n51']], $response);
+        $this->assertEquals(['data' => ['orderId' => 'mv81m-u7n51']], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'data' => ['orderId' => 'mv81m-u7n51'],
+            'error' => ['code' => 0],
+            'success' => true,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -788,7 +859,12 @@ class ApiClientTest extends TestCase
             'https://test-pay.test/api/success'
         );
 
-        $this->assertEquals(['data' => ['orderId' => 'vun441m,c']], $response);
+        $this->assertEquals(['data' => ['orderId' => 'vun441m,c']], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'data' => ['orderId' => 'vun441m,c'],
+            'error' => ['code' => 0],
+            'success' => true,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -835,7 +911,12 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/html']]
         );
 
-        $this->assertEquals(['data' => ['orderId' => 'v81-8bvm532']], $response);
+        $this->assertEquals(['data' => ['orderId' => 'v81-8bvm532']], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'data' => ['orderId' => 'v81-8bvm532'],
+            'error' => ['code' => 0],
+            'success' => true,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -877,7 +958,12 @@ class ApiClientTest extends TestCase
         $this->assertEquals([
             'orderId' => '9nv352-mda1',
             'receipt' => ["receiptStatus" => 1],
-        ], $response);
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderId' => '9nv352-mda1',
+            'receipt' => ["receiptStatus" => 1],
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -906,7 +992,12 @@ class ApiClientTest extends TestCase
         $this->assertEquals([
             'orderId' => 'm9m1vc-012',
             'receipt' => ["receiptStatus" => 1],
-        ], $response);
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderId' => 'm9m1vc-012',
+            'receipt' => ["receiptStatus" => 1],
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -946,7 +1037,12 @@ class ApiClientTest extends TestCase
         $this->assertEquals([
             'orderId' => 'v98l,91m6n532',
             'receipt' => ["receiptStatus" => 1],
-        ], $response);
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'orderId' => 'v98l,91m6n532',
+            'receipt' => ["receiptStatus" => 1],
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -972,7 +1068,8 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->bindCard('8n518ncsdf');
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1004,7 +1101,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/plain']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1030,7 +1128,8 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->unBindCard('19vcm53012');
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1062,7 +1161,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/plain']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1088,7 +1188,8 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->getBindings('91-bvc56432');
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1120,7 +1221,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/plain']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1156,7 +1258,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/plain']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1183,7 +1286,8 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->extendBinding('10vmxs121', 202201);
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1221,7 +1325,8 @@ class ApiClientTest extends TestCase
             [['content-type' => 'text/plain']]
         );
 
-        $this->assertEquals([], $response);
+        $this->assertEquals([], $response->getFormattedResponseArray());
+        $this->assertEquals(['errorCode' => 0], $response->getResponseArray());
     }
 
     /**
@@ -1247,7 +1352,15 @@ class ApiClientTest extends TestCase
         ]);
         $response = $client->verifyEnrollment('5555-4151-512-5111');
 
-        $this->assertEquals(['enrolled' => true, 'emitterName' => 'Emitter bank'], $response);
+        $this->assertEquals([
+            'enrolled' => true,
+            'emitterName' => 'Emitter bank'
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'enrolled' => true,
+            'emitterName' => 'Emitter bank',
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     /**
@@ -1281,7 +1394,15 @@ class ApiClientTest extends TestCase
             [['content-type' => 'application/json']]
         );
 
-        $this->assertEquals(['enrolled' => true, 'emitterName' => 'Emitter bank'], $response);
+        $this->assertEquals([
+            'enrolled' => true,
+            'emitterName' => 'Emitter bank'
+        ], $response->getFormattedResponseArray());
+        $this->assertEquals([
+            'enrolled' => true,
+            'emitterName' => 'Emitter bank',
+            'errorCode' => 0,
+        ], $response->getResponseArray());
     }
 
     private function getHttpClientMock(

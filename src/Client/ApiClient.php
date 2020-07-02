@@ -72,7 +72,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['amount'] = $amount;
         $params['returnUrl'] = $returnUrl;
         return $this->requestWithAuth(self::PATH_REGISTER, $params, $method, $headers);
@@ -87,7 +87,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['amount'] = $amount;
         $params['returnUrl'] = $returnUrl;
         return $this->requestWithAuth(self::PATH_REGISTER_PRE_AUTH, $params, $method, $headers);
@@ -102,7 +102,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['orderId'] = $orderId;
         $params['amount'] = $amount;
         return $this->requestWithAuth(self::PATH_DEPOSIT, $params, $method, $headers);
@@ -116,7 +116,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['orderId'] = $orderId;
         return $this->requestWithAuth(self::PATH_REVERSE, $params, $method, $headers);
     }
@@ -130,7 +130,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['orderId'] = $orderId;
         $params['amount'] = $amount;
         return $this->requestWithAuth(self::PATH_REFUND, $params, $method, $headers);
@@ -143,7 +143,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         if (isset($params['orderId']) === false && isset($params['orderNumber']) === false) {
             throw new \InvalidArgumentException('"orderId" either "orderNumber" is required');
         }
@@ -159,7 +159,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['merchant'] = $merchant;
         $params['paymentToken'] = $paymentToken;
         return $this->request(self::PATH_APPLE_PAY, $params, $method, $headers);
@@ -174,7 +174,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['merchant'] = $merchant;
         $params['paymentToken'] = $paymentToken;
         return $this->request(self::PATH_SAMSUNG_PAY, $params, $method, $headers);
@@ -191,7 +191,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['merchant'] = $merchant;
         $params['paymentToken'] = $paymentToken;
         $params['amount'] = $amount;
@@ -206,7 +206,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         if (
             isset($params['orderId']) === false &&
             isset($params['orderNumber']) === false &&
@@ -225,7 +225,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['bindingId'] = $bindingId;
         return $this->requestWithAuth(self::PATH_BIND, $params, $method, $headers);
     }
@@ -238,7 +238,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['bindingId'] = $bindingId;
         return $this->requestWithAuth(self::PATH_UNBIND, $params, $method, $headers);
     }
@@ -251,7 +251,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['clientId'] = $clientId;
         return $this->request(self::PATH_GET_BINDINGS, $params, $method, $headers);
     }
@@ -263,7 +263,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         return $this->requestWithAuth(self::PATH_GET_BINDINGS_BY_CARD_OR_ID, $params, $method, $headers);
     }
 
@@ -276,7 +276,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['bindingId'] = $bindingId;
         $params['newExpiry'] = $newExpiry;
         return $this->requestWithAuth(self::PATH_EXTEND_BINDING, $params, $method, $headers);
@@ -290,7 +290,7 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $params['pan'] = $pan;
         return $this->requestWithAuth(self::PATH_VERIFY_ENROLLMENT, $params, $method, $headers);
     }
@@ -301,16 +301,16 @@ class ApiClient implements ApiClientInterface
      * @param string $method
      * @param array $headers
      *
-     * @return array
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @return SberbankResponse
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
      */
     public function requestWithAuth(
         string $pathName,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         if (empty($params['userName']) === false && empty($params['password']) === false) {
             unset($params['token']);
         } elseif (empty($this->userName) === false && empty($this->password) === false) {
@@ -345,12 +345,11 @@ class ApiClient implements ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
+    ): SberbankResponse {
         $uri = $this->buildUri($pathName);
         $httpClient = $this->getHttpClient();
         $response = $httpClient->request($uri, $method, $params, $headers);
-        $sberbankResponse = new SberbankResponse($response);
-        return $sberbankResponse->getFormattedResponse();
+        return new SberbankResponse($response);
     }
 
     /**

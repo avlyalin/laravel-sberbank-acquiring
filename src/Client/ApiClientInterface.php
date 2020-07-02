@@ -35,7 +35,7 @@ interface ApiClientInterface
      * @param string $method    Тип HTTP-запроса
      * @param array $headers    Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function register(
         int $amount,
@@ -43,7 +43,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Регистрация заказа с предавторизацией
@@ -56,7 +56,7 @@ interface ApiClientInterface
      * @param string $method    Тип HTTP-запроса
      * @param array $headers    Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function registerPreAuth(
         int $amount,
@@ -64,7 +64,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос завершения оплаты заказа
@@ -77,7 +77,7 @@ interface ApiClientInterface
      * @param string $method      Тип HTTP-запроса
      * @param array $headers      Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function deposit(
         $orderId,
@@ -85,7 +85,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос отмены оплаты заказа
@@ -97,14 +97,14 @@ interface ApiClientInterface
      * @param string $method      Тип HTTP-запроса
      * @param array $headers      Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function reverse(
         $orderId,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос возврата средств оплаты заказа
@@ -117,7 +117,7 @@ interface ApiClientInterface
      * @param string $method      Тип HTTP-запроса
      * @param array $headers      Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function refund(
         $orderId,
@@ -125,7 +125,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Получение статуса заказа
@@ -136,13 +136,13 @@ interface ApiClientInterface
      * @param string $method Тип HTTP-запроса
      * @param array $headers Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function getOrderStatusExtended(
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос оплаты через Apple Pay
@@ -155,7 +155,7 @@ interface ApiClientInterface
      * @param string $method       Тип HTTP-запроса
      * @param array $headers       Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function payWithApplePay(
         string $merchant,
@@ -163,7 +163,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос оплаты через Samsung Pay
@@ -176,7 +176,7 @@ interface ApiClientInterface
      * @param string $method       Тип HTTP-запроса
      * @param array $headers       Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function payWithSamsungPay(
         string $merchant,
@@ -184,7 +184,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос оплаты через Google Pay
@@ -199,7 +199,7 @@ interface ApiClientInterface
      * @param string $method       Тип HTTP-запроса
      * @param array $headers       Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function payWithGooglePay(
         string $merchant,
@@ -209,7 +209,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос сведений о кассовом чеке
@@ -220,13 +220,13 @@ interface ApiClientInterface
      * @param string $method Тип HTTP-запроса
      * @param array $headers Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function getReceiptStatus(
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос активации связки
@@ -238,14 +238,14 @@ interface ApiClientInterface
      * @param string $method    Тип HTTP-запроса
      * @param array $headers    Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function bindCard(
         string $bindingId,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос деактивации связки
@@ -257,14 +257,14 @@ interface ApiClientInterface
      * @param string $method    Тип HTTP-запроса
      * @param array $headers    Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function unBindCard(
         string $bindingId,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос списка всех связок клиента
@@ -276,14 +276,14 @@ interface ApiClientInterface
      * @param string $method   Тип HTTP-запроса
      * @param array $headers   Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function getBindings(
         string $clientId,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос списка связок определённой банковской карты
@@ -294,13 +294,13 @@ interface ApiClientInterface
      * @param string $method Тип HTTP-запроса
      * @param array $headers Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function getBindingsByCardOrId(
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос изменения срока действия связки
@@ -313,7 +313,7 @@ interface ApiClientInterface
      * @param string $method    Тип HTTP-запроса
      * @param array $headers    Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function extendBinding(
         string $bindingId,
@@ -321,7 +321,7 @@ interface ApiClientInterface
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 
     /**
      * Запрос проверки вовлечённости карты в 3DS
@@ -333,12 +333,12 @@ interface ApiClientInterface
      * @param string $method Тип HTTP-запроса
      * @param array $headers Хэдеры HTTP-клиента
      *
-     * @return array Ответ сервера
+     * @return SberbankResponse Ответ сервера
      */
     public function verifyEnrollment(
         string $pan,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array;
+    ): SberbankResponse;
 }
