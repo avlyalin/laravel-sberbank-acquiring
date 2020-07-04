@@ -7,7 +7,6 @@ namespace Avlyalin\SberbankAcquiring\Client;
 use Avlyalin\SberbankAcquiring\Exceptions\JsonException;
 use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
-use Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
@@ -109,6 +108,22 @@ class Client
         );
     }
 
+    /**
+     * @param int $acquiringPaymentId id модели платежа AcquiringPayment
+     * @param int $amount             Сумма платежа в минимальных единицах валюты
+     * @param array $params           Дополнительные параметры
+     * @param string $method          Тип HTTP-запроса
+     * @param array $headers          Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws \InvalidArgumentException
+     * @throws Throwable
+     */
     public function deposit(
         int $acquiringPaymentId,
         int $amount,
@@ -116,7 +131,44 @@ class Client
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
     ): AcquiringPayment {
-        // TODO
+        /** @var AcquiringPayment $acquiringPayment */
+        $acquiringPayment = $this->acquiringPaymentRepository->findOrFail($acquiringPaymentId);
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => Auth::id(),
+            'type_id' => DictAcquiringPaymentOperationType::DEPOSIT,
+            'request_json' => array_merge([
+                'orderId' => $acquiringPayment->bank_order_id,
+                'amount' => $amount,
+            ], $params),
+        ]);
+        $operation->saveOrFail();
+
+        $response = $this->apiClient->deposit(
+            $acquiringPayment->bank_order_id,
+            $amount,
+            $this->addAuthParams($params),
+            $method,
+            $headers
+        );
+
+        if ($response->isOk() === false) {
+            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+        }
+
+        $operationSaved = $operation->update([
+            'response_json' => $response->getResponseArray(),
+        ]);
+        if (!$operationSaved) {
+            $responseString = $response->getResponse();
+            throw new ResponseProcessingException(
+                "Error updating AcquiringPaymentOperation. Response: $responseString"
+            );
+        }
+
+        return $acquiringPayment;
     }
 
     /**

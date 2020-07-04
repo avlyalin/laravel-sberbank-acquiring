@@ -20,6 +20,7 @@ use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Config;
 
 class ClientTest extends TestCase
@@ -295,8 +296,132 @@ class ClientTest extends TestCase
      */
     public function deposit_method_uses_auth_params_from_config(array $authParams)
     {
-        yield [1000, 'http://pay.test.com/pay', ['userName' => 'test_userName', 'password' => 'test_password']];
-        yield [1000, 'http://pay.test.com/pay', ['token' => 'test_token']];
+        Config::set('sberbank-acquiring.auth', $authParams);
+
+        $this->mockApiClient(
+            'deposit',
+            function ($paymentId, $requestAmount, $requestParams) use ($authParams) {
+                $this->assertEquals($authParams, array_intersect($authParams, $requestParams));
+                return true;
+            },
+            ['errorCode' => 0]
+        );
+
+        $acquiringPayment = $this->createAcquiringPayment();
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->deposit($acquiringPayment->id, 5000);
+    }
+
+    /**
+     * @test
+     */
+    public function deposit_method_throws_exception_when_gets_non_existing_payment_id()
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->mockApiClient('deposit', function () {
+            return true;
+        }, ['errorCode' => 0]);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->deposit(99, 5000);
+    }
+
+    /**
+     * @test
+     */
+    public function deposit_method_throws_exception_when_cannot_update_payment_models_with_response()
+    {
+        $this->expectException(ResponseProcessingException::class);
+        $this->expectExceptionMessage("Error updating AcquiringPaymentOperation. Response: {\"errorCode\":0}");
+
+        $operation = $this->mockAcquiringPaymentOperation('update', false);
+
+        $factory = \Mockery::mock(PaymentsFactory::class)->makePartial();
+        $factory->shouldReceive('createPaymentOperation')->andReturn($operation);
+        $this->app->instance(PaymentsFactory::class, $factory);
+
+        $this->mockApiClient('deposit', function () {
+            return true;
+        }, ['errorCode' => 0]);
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $this->createAcquiringPayment();
+        $client->deposit($acquiringPayment->id, 5000);
+
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::DEPOSIT,
+            'request_json' => json_encode(['orderId' => $acquiringPayment->bank_order_id, 'amount' => 5000]),
+        ]);
+    }
+
+    /**
+     * @test
+     * @dataProvider deposit_method_data_provider
+     */
+    public function deposit_method_saves_operation_to_db_and_returns_response(
+        int $amount,
+        array $params,
+        array $authParams,
+        string $method,
+        array $headers,
+        array $response,
+        int $paymentStatusId
+    ) {
+        $this->setAuthParams($authParams);
+        $expectedParams = array_merge($authParams, $params);
+
+        $this->mockApiClient('deposit', function (
+            $paymentId,
+            $requestAmount,
+            $requestParams,
+            $requestMethod,
+            $requestHeaders
+        ) use (
+            $amount,
+            $method,
+            $expectedParams,
+            $headers
+        ) {
+            $this->assertEquals($amount, $requestAmount);
+            $this->assertEquals($expectedParams, $requestParams);
+            $this->assertEquals($method, $requestMethod);
+            $this->assertEquals($headers, $requestHeaders);
+            return true;
+        }, $response);
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::REGISTERED]);
+        $acquiringPayment = $client->deposit($acquiringPayment->id, $amount, $params, $method, $headers);
+
+        $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
+        $this->assertDatabaseHas($this->getTableName('payments'), [
+            'id' => $acquiringPayment->id,
+            'status_id' => $paymentStatusId,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::DEPOSIT,
+            'request_json' => json_encode(array_merge([
+                'orderId' => $acquiringPayment->bank_order_id,
+                'amount' => $amount,
+            ], $params)),
+            'response_json' => json_encode($response),
+        ]);
     }
 
     public function register_method_data_provider()
@@ -364,6 +489,55 @@ class ClientTest extends TestCase
     {
         yield [['userName' => 'test_userName', 'password' => 'test_password']];
         yield [['token' => 'test_token']];
+    }
+
+    public function deposit_method_data_provider()
+    {
+        yield [
+            1000,
+            ['param-1' => 'value-1'],
+            ['token' => 'deposit_auth_token'],
+            HttpClientInterface::METHOD_POST,
+            ['header-1' => 'header-1-value'],
+            ['errorCode' => 0],
+            DictAcquiringPaymentStatus::REGISTERED,
+        ];
+        yield [
+            2000,
+            [],
+            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            HttpClientInterface::METHOD_POST,
+            ['header-2' => 'header-2-value'],
+            ['error' => ['code' => 0, 'message' => 'success']],
+            DictAcquiringPaymentStatus::REGISTERED,
+        ];
+        yield [
+            3000,
+            ['param-1' => 'value-1', 'param-2' => 'value-2'],
+            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 0, 'message' => 'success']],
+            DictAcquiringPaymentStatus::REGISTERED,
+        ];
+        yield [
+            3000,
+            [],
+            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+        yield [
+            3000,
+            ['param' => 'value'],
+            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 10, 'message' => 'success']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
     }
 
     private function mockApiClient(string $method, callable $expectedArgs, array $returnValue)
