@@ -671,7 +671,7 @@ class ClientTest extends TestCase
     {
         yield [
             ['language' => 'RU'],
-            ['token' => 'deposit_auth_token'],
+            ['token' => 'reverse_auth_token'],
             HttpClientInterface::METHOD_POST,
             ['header-1' => 'header-1-value'],
             ['errorCode' => 0],
@@ -679,7 +679,7 @@ class ClientTest extends TestCase
         ];
         yield [
             [],
-            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            ['userName' => 'reverse_userName', 'password' => 'reverse_password'],
             HttpClientInterface::METHOD_POST,
             ['header-2' => 'header-2-value'],
             ['error' => ['code' => 0, 'message' => 'success']],
@@ -687,7 +687,7 @@ class ClientTest extends TestCase
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
-            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            ['userName' => 'reverse_userName', 'password' => 'reverse_password'],
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success']],
@@ -695,7 +695,7 @@ class ClientTest extends TestCase
         ];
         yield [
             [],
-            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            ['userName' => 'reverse_userName', 'password' => 'reverse_password'],
             HttpClientInterface::METHOD_POST,
             [],
             ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
@@ -703,7 +703,7 @@ class ClientTest extends TestCase
         ];
         yield [
             [],
-            ['userName' => 'deposit_userName', 'password' => 'deposit_password'],
+            ['userName' => 'reverse_userName', 'password' => 'reverse_password'],
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 10, 'message' => 'success']],
