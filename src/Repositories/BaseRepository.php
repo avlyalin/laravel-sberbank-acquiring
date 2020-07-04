@@ -43,6 +43,8 @@ abstract class BaseRepository
      * @param string[] $columns
      *
      * @return Model
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function findOrFail(int $id, $columns = ['*']): Model
     {

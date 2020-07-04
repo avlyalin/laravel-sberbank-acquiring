@@ -302,8 +302,9 @@ class ApiClient implements ApiClientInterface
      * @param array $headers
      *
      * @return SberbankResponse
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function requestWithAuth(
         string $pathName,
@@ -336,9 +337,10 @@ class ApiClient implements ApiClientInterface
      * @param string $method
      * @param array $headers
      *
-     * @return array
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException
+     * @return SberbankResponse
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function request(
         string $pathName,
@@ -368,6 +370,7 @@ class ApiClient implements ApiClientInterface
 
     /**
      * @return HttpClientInterface
+     * @throws \InvalidArgumentException
      */
     private function getHttpClient(): HttpClientInterface
     {

@@ -12,8 +12,10 @@ use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class Client
 {
@@ -49,6 +51,19 @@ class Client
         $this->acquiringPaymentRepository = $acquiringPaymentRepository;
     }
 
+    /**
+     * @param int $amount    Сумма платежа в минимальных единицах валюты
+     * @param array $params  Дополнительные параметры
+     * @param string $method Тип HTTP-запроса
+     * @param array $headers Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws JsonException
+     * @throws ResponseProcessingException
+     * @throws \InvalidArgumentException
+     * @throws Throwable
+     */
     public function register(
         int $amount,
         array $params = [],
@@ -64,6 +79,19 @@ class Client
         );
     }
 
+    /**
+     * @param int $amount    Сумма платежа в минимальных единицах валюты
+     * @param array $params  Дополнительные параметры
+     * @param string $method Тип HTTP-запроса
+     * @param array $headers Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws JsonException
+     * @throws ResponseProcessingException
+     * @throws \InvalidArgumentException
+     * @throws Throwable
+     */
     public function registerPreAuth(
         int $amount,
         array $params = [],
@@ -327,7 +355,7 @@ class Client
      * @param array $params
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private function addAuthParams(array $params = []): array
     {

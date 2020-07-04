@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Client;
 
+use Avlyalin\SberbankAcquiring\Exceptions\HttpClientException;
+use Avlyalin\SberbankAcquiring\Exceptions\NetworkException;
+
 interface HttpClientInterface
 {
 
@@ -30,6 +33,9 @@ interface HttpClientInterface
      * @param array $headers Хэдеры
      *
      * @return string
+     * @throws NetworkException
+     * @throws HttpClientException
+     * @throws \InvalidArgumentException
      */
     public function request(
         string $uri,

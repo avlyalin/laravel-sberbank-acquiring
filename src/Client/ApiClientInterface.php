@@ -36,6 +36,10 @@ interface ApiClientInterface
      * @param array $headers    Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function register(
         int $amount,
@@ -57,6 +61,10 @@ interface ApiClientInterface
      * @param array $headers    Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function registerPreAuth(
         int $amount,
@@ -78,6 +86,10 @@ interface ApiClientInterface
      * @param array $headers      Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function deposit(
         $orderId,
@@ -98,6 +110,10 @@ interface ApiClientInterface
      * @param array $headers      Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function reverse(
         $orderId,
@@ -118,6 +134,10 @@ interface ApiClientInterface
      * @param array $headers      Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function refund(
         $orderId,
@@ -137,6 +157,10 @@ interface ApiClientInterface
      * @param array $headers Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function getOrderStatusExtended(
         array $params = [],
@@ -156,6 +180,10 @@ interface ApiClientInterface
      * @param array $headers       Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function payWithApplePay(
         string $merchant,
@@ -177,6 +205,10 @@ interface ApiClientInterface
      * @param array $headers       Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function payWithSamsungPay(
         string $merchant,
@@ -200,6 +232,10 @@ interface ApiClientInterface
      * @param array $headers       Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function payWithGooglePay(
         string $merchant,
@@ -221,6 +257,10 @@ interface ApiClientInterface
      * @param array $headers Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function getReceiptStatus(
         array $params = [],
@@ -239,6 +279,10 @@ interface ApiClientInterface
      * @param array $headers    Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function bindCard(
         string $bindingId,
@@ -258,6 +302,10 @@ interface ApiClientInterface
      * @param array $headers    Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function unBindCard(
         string $bindingId,
@@ -277,6 +325,10 @@ interface ApiClientInterface
      * @param array $headers   Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function getBindings(
         string $clientId,
@@ -295,6 +347,10 @@ interface ApiClientInterface
      * @param array $headers Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function getBindingsByCardOrId(
         array $params = [],
@@ -314,6 +370,10 @@ interface ApiClientInterface
      * @param array $headers    Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function extendBinding(
         string $bindingId,
@@ -334,6 +394,10 @@ interface ApiClientInterface
      * @param array $headers Хэдеры HTTP-клиента
      *
      * @return SberbankResponse Ответ сервера
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \InvalidArgumentException
      */
     public function verifyEnrollment(
         string $pan,

@@ -42,6 +42,8 @@ class HttpClient implements HttpClientInterface
      *
      * @return string
      * @throws NetworkException
+     * @throws HttpClientException
+     * @throws \InvalidArgumentException
      */
     public function request(
         string $uri,
