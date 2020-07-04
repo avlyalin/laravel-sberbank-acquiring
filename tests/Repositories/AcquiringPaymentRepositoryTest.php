@@ -19,7 +19,7 @@ class AcquiringPaymentRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new AcquiringPaymentRepository(new AcquiringPayment());
+        $this->repository = $this->app->make(AcquiringPaymentRepository::class);
     }
 
     /**
@@ -29,9 +29,12 @@ class AcquiringPaymentRepositoryTest extends TestCase
     {
         $acquiringPayment = $this->createAcquiringPayment();
 
-        $model = $this->repository->find($acquiringPayment->id);
+        $columns = ['id', 'bank_order_id'];
+        $model = $this->repository->find($acquiringPayment->id, $columns);
         $this->assertInstanceOf(AcquiringPayment::class, $model);
         $this->assertEquals($acquiringPayment->id, $model->id);
+        $this->assertCount(2, $model->getAttributes());
+        $this->assertEquals(['id', 'bank_order_id'], array_keys($model->getAttributes()));
     }
 
     /**
@@ -41,9 +44,12 @@ class AcquiringPaymentRepositoryTest extends TestCase
     {
         $acquiringPayment = $this->createAcquiringPayment();
 
-        $model = $this->repository->findOrFail($acquiringPayment->id);
+        $columns = ['id', 'status_id', 'system_id'];
+        $model = $this->repository->findOrFail($acquiringPayment->id, $columns);
         $this->assertInstanceOf(AcquiringPayment::class, $model);
         $this->assertEquals($acquiringPayment->id, $model->id);
+        $this->assertCount(3, $model->getAttributes());
+        $this->assertEquals($columns, array_keys($model->getAttributes()));
     }
 
     /**
