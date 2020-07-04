@@ -20,16 +20,16 @@ return [
     ],
 
     'auth' => [
-        'userName' => env('SBERBANK_USERNAME'),
-        'password' => env('SBERBANK_PASSWORD'),
-        'token' => env('SBERBANK_TOKEN'),
+        'userName' => env('SBERBANK_USERNAME', ''),
+        'password' => env('SBERBANK_PASSWORD', ''),
+        'token' => env('SBERBANK_TOKEN', ''),
     ],
 
-    'baseUri' => env('SBERBANK_URI'),
+    'baseUri' => env('SBERBANK_URI', ''),
 
     'params' => [
-        'return_url' => env('SBERBANK_RETURN_URL'),
-        'fail_url' => env('SBERBANK_FAIL_URL'),
+        'return_url' => env('SBERBANK_RETURN_URL', ''),
+        'fail_url' => env('SBERBANK_FAIL_URL', ''),
     ],
 //
 //    'order_number' => [
