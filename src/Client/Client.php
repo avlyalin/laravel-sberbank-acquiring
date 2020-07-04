@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Client;
 
+use Avlyalin\SberbankAcquiring\Exceptions\JsonException;
+use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Avlyalin\SberbankAcquiring\Exceptions\ErrorResponseException;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
@@ -285,8 +287,10 @@ class Client
      * @param array $headers
      *
      * @return AcquiringPayment
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
-     * @throws \Exception
+     * @throws JsonException
+     * @throws ResponseProcessingException
+     * @throws \InvalidArgumentException
+     * @throws Throwable
      */
     private function performRegister(
         int $operationId,
@@ -302,51 +306,62 @@ class Client
 
         $requestData = array_merge(['amount' => $amount, 'returnUrl' => $returnUrl], $params);
 
-        $requestParams = $this->addAuthParams($params);
+        $payment = $this->paymentsFactory->createSberbankPayment();
+        $payment->fillWithSberbankParams($requestData);
+        $payment->saveOrFail();
+
+        $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
+        $acquiringPayment->fill([
+            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
+            'status_id' => DictAcquiringPaymentStatus::NEW,
+        ]);
+        $acquiringPayment->payment()->associate($payment);
+        $acquiringPayment->saveOrFail();
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'user_id' => Auth::id(),
+            'type_id' => $operationId,
+            'request_json' => $requestData,
+        ]);
+        $operation->payment()->associate($acquiringPayment);
+        $operation->saveOrFail();
 
         $response = $this->apiClient->register(
             $amount,
             $returnUrl,
-            $requestParams,
+            $this->addAuthParams($params),
             $method,
             $headers
         );
 
-        if ($response->isOk()) {
-            $statusId = DictAcquiringPaymentStatus::REGISTERED;
-        } else {
-            $statusId = DictAcquiringPaymentStatus::ERROR;
-        }
-
+        /** @var SberbankResponse $responseData */
         $responseData = $response->getResponseArray();
 
-        $acquiringPayment = $this->paymentsFactory->createAcquiringPayment([
-            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
+        $errorMessage = '';
+        $paymentSaved = $payment->update(['bank_form_url' => $responseData['formUrl']]);
+        if (!$paymentSaved) {
+            $errorMessage .= 'Error updating SberbankPayment. ';
+        }
+
+        $acquiringPaymentSaved = $acquiringPayment->update([
             'bank_order_id' => $responseData['orderId'],
-            'status_id' => $statusId,
+            'status_id' => $response->isOk() ? DictAcquiringPaymentStatus::REGISTERED
+                : DictAcquiringPaymentStatus::ERROR,
         ]);
+        if (!$acquiringPaymentSaved) {
+            $errorMessage .= 'Error updating AcquiringPayment. ';
+        }
 
-        $payment = $this->paymentsFactory->createSberbankPayment([
-            'bank_form_url' => $responseData['formUrl'],
-        ]);
-        $payment->fillWithSberbankParams($requestData);
+        $operationSaved = $operation->update(['response_json' => $responseData]);
+        if (!$operationSaved) {
+            $errorMessage .= 'Error updating AcquiringPaymentOperation. ';
+        }
 
-        $operation = $this->paymentsFactory->createPaymentOperation([
-            'user_id' => Auth::id(),
-            'type_id' => $operationId,
-            'request_json' => $requestData,
-            'response_json' => $responseData,
-        ]);
-
-        DB::transaction(function () use ($acquiringPayment, $payment, $operation) {
-            $payment->saveOrFail();
-
-            $acquiringPayment->payment()->associate($payment);
-            $acquiringPayment->saveOrFail();
-
-            $operation->payment()->associate($acquiringPayment);
-            $operation->saveOrFail();
-        });
+        if (!empty($errorMessage)) {
+            $response = (string)$response->getResponse();
+            throw new ResponseProcessingException($errorMessage . "Response: $response");
+        }
 
         return $acquiringPayment;
     }

@@ -95,4 +95,25 @@ class TestCase extends Orchestra
     {
         return factory(AcquiringPaymentOperation::class)->create($attributes);
     }
+
+    protected function mockAcquiringPayment(string $method, $returnValue)
+    {
+        $acquiringPayment = \Mockery::mock(AcquiringPayment::class . "[$method]");
+        $acquiringPayment->shouldReceive($method)->andReturn($returnValue);
+        return $acquiringPayment;
+    }
+
+    protected function mockSberbankPayment(string $method, $returnValue)
+    {
+        $sberbankPayment = \Mockery::mock(SberbankPayment::class . "[$method]");
+        $sberbankPayment->shouldReceive($method)->andReturn($returnValue);
+        return $sberbankPayment;
+    }
+
+    protected function mockAcquiringPaymentOperation(string $method, $returnValue)
+    {
+        $operation = \Mockery::mock(AcquiringPaymentOperation::class . "[$method]");
+        $operation->shouldReceive($method)->andReturn($returnValue);
+        return $operation;
+    }
 }
