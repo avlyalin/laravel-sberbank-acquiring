@@ -239,17 +239,69 @@ class Client
     }
 
     /**
-     * @inheritDoc
+     * Запрос возврата средств оплаты заказа
+     *
+     * @param int $acquiringPaymentId id модели платежа AcquiringPayment
+     * @param int $amount             Сумма платежа в минимальных единицах валюты
+     * @param array $params           Дополнительные параметры
+     * @param string $method          Тип HTTP-запроса
+     * @param array $headers          Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws Throwable
      */
     public function refund(
-        $orderId,
+        int $acquiringPaymentId,
         int $amount,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
-        // TODO: Implement refund() method.
+    ): AcquiringPayment {
+        /** @var AcquiringPayment $acquiringPayment */
+        $acquiringPayment = $this->acquiringPaymentRepository->findOrFail($acquiringPaymentId);
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => Auth::id(),
+            'type_id' => DictAcquiringPaymentOperationType::REFUND,
+            'request_json' => array_merge([
+                'orderId' => $acquiringPayment->bank_order_id,
+                'amount' => $amount,
+            ], $params),
+        ]);
+        $operation->saveOrFail();
+
+        $response = $this->apiClient->refund(
+            $acquiringPayment->bank_order_id,
+            $amount,
+            $this->addAuthParams($params),
+            $method,
+            $headers
+        );
+
+        if (!$response->isOk()) {
+            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+        }
+
+        $operationSaved = $operation->update([
+            'response_json' => $response->getResponseArray(),
+        ]);
+        if (!$operationSaved) {
+            $responseString = $response->getResponse();
+            throw new ResponseProcessingException(
+                "Error updating AcquiringPaymentOperation. Response: $responseString"
+            );
+        }
+
+        return $acquiringPayment;
     }
+
 
     /**
      * @inheritDoc

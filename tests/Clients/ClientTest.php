@@ -551,6 +551,143 @@ class ClientTest extends TestCase
         ]);
     }
 
+    /**
+     * @test
+     * @dataProvider auth_params_data_provider
+     */
+    public function refund_method_uses_auth_params_from_config(array $authParams)
+    {
+        Config::set('sberbank-acquiring.auth', $authParams);
+
+        $this->mockApiClient(
+            'refund',
+            function ($paymentId, $amount, $requestParams) use ($authParams) {
+                $this->assertEquals($authParams, array_intersect($authParams, $requestParams));
+                return true;
+            },
+            ['errorCode' => 0]
+        );
+
+        $acquiringPayment = $this->createAcquiringPayment();
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->refund($acquiringPayment->id, 1000);
+    }
+
+    /**
+     * @test
+     */
+    public function refund_method_throws_exception_when_gets_non_existing_payment_id()
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->mockApiClient('refund', function () {
+            return true;
+        }, ['errorCode' => 0]);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->refund(99, 1000);
+    }
+
+    /**
+     * @test
+     */
+    public function refund_method_throws_exception_when_cannot_update_payment_models_with_response()
+    {
+        $this->expectException(ResponseProcessingException::class);
+        $this->expectExceptionMessage("Error updating AcquiringPaymentOperation. Response: {\"errorCode\":0}");
+
+        $operation = $this->mockAcquiringPaymentOperation('update', false);
+
+        $factory = \Mockery::mock(PaymentsFactory::class)->makePartial();
+        $factory->shouldReceive('createPaymentOperation')->andReturn($operation);
+        $this->app->instance(PaymentsFactory::class, $factory);
+
+        $this->mockApiClient('refund', function () {
+            return true;
+        }, ['errorCode' => 0]);
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $this->createAcquiringPayment();
+        $client->refund($acquiringPayment->id, 5000);
+
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::REFUND,
+            'request_json' => json_encode([
+                'orderId' => $acquiringPayment->bank_order_id,
+                'amount' => 5000,
+            ]),
+        ]);
+    }
+
+    /**
+     * @test
+     * @dataProvider refund_method_data_provider
+     */
+    public function refund_method_saves_operation_to_db_and_returns_response(
+        int $amount,
+        array $params,
+        array $authParams,
+        string $method,
+        array $headers,
+        array $response,
+        int $paymentStatusId
+    ) {
+        $this->setAuthParams($authParams);
+        $expectedParams = array_merge($authParams, $params);
+
+        $this->mockApiClient('refund', function (
+            $paymentId,
+            $requestAmount,
+            $requestParams,
+            $requestMethod,
+            $requestHeaders
+        ) use (
+            $amount,
+            $method,
+            $expectedParams,
+            $headers
+        ) {
+            $this->assertEquals($amount, $requestAmount);
+            $this->assertEquals($expectedParams, $requestParams);
+            $this->assertEquals($method, $requestMethod);
+            $this->assertEquals($headers, $requestHeaders);
+            return true;
+        }, $response);
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::CONFIRMED]);
+        $acquiringPayment = $client->refund($acquiringPayment->id, $amount, $params, $method, $headers);
+
+        $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
+        $this->assertDatabaseHas($this->getTableName('payments'), [
+            'id' => $acquiringPayment->id,
+            'status_id' => $paymentStatusId,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::REFUND,
+            'request_json' => json_encode(array_merge([
+                'orderId' => $acquiringPayment->bank_order_id,
+                'amount' => $amount,
+            ], $params)),
+            'response_json' => json_encode($response),
+        ]);
+    }
+
     public function register_method_data_provider()
     {
         yield [1000, 'http://pay.test.com/pay', [
@@ -711,6 +848,54 @@ class ClientTest extends TestCase
         ];
     }
 
+    public function refund_method_data_provider()
+    {
+        yield [
+            5000,
+            ['language' => 'DE'],
+            ['token' => 'refund_auth_token'],
+            HttpClientInterface::METHOD_POST,
+            ['header-1' => 'header-1-value'],
+            ['errorCode' => 0],
+            DictAcquiringPaymentStatus::CONFIRMED,
+        ];
+        yield [
+            1005,
+            [],
+            ['userName' => 'refund_userName', 'password' => 'refund_password'],
+            HttpClientInterface::METHOD_POST,
+            ['header-2' => 'header-2-value'],
+            ['error' => ['code' => 0, 'message' => 'success']],
+            DictAcquiringPaymentStatus::CONFIRMED,
+        ];
+        yield [
+            2100,
+            ['language' => 'EN', 'additional_param' => 'value'],
+            ['userName' => 'refund_userName', 'password' => 'refund_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 0, 'message' => 'success']],
+            DictAcquiringPaymentStatus::CONFIRMED,
+        ];
+        yield [
+            3200,
+            ['language' => 'EN'],
+            ['userName' => 'refund_userName', 'password' => 'refund_password'],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+        yield [
+            5010,
+            [],
+            ['userName' => 'refund_userName', 'password' => 'refund_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 10, 'message' => 'success']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+    }
 
     private function mockApiClient(string $method, callable $expectedArgs, array $returnValue)
     {
