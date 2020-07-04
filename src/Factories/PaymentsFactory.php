@@ -14,62 +14,50 @@ use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
 class PaymentsFactory
 {
     /**
-     * @param array $attributes
-     *
      * @return AcquiringPayment
      */
-    public function createAcquiringPayment(array $attributes = []): AcquiringPayment
+    public function createAcquiringPayment(): AcquiringPayment
     {
-        return new AcquiringPayment($attributes);
+        return new AcquiringPayment();
     }
 
     /**
-     * @param array $attributes
-     *
      * @return SberbankPayment
      */
-    public function createSberbankPayment(array $attributes = []): SberbankPayment
+    public function createSberbankPayment(): SberbankPayment
     {
-        return new SberbankPayment($attributes);
+        return new SberbankPayment();
     }
 
     /**
-     * @param array $attributes
-     *
      * @return ApplePayPayment
      */
-    public function createApplePayPayment(array $attributes = []): ApplePayPayment
+    public function createApplePayPayment(): ApplePayPayment
     {
-        return new ApplePayPayment($attributes);
+        return new ApplePayPayment();
     }
 
     /**
-     * @param array $attributes
-     *
      * @return SamsungPayPayment
      */
-    public function createSamsungPayPayment(array $attributes = []): SamsungPayPayment
+    public function createSamsungPayPayment(): SamsungPayPayment
     {
-        return new SamsungPayPayment($attributes);
+        return new SamsungPayPayment();
     }
 
     /**
-     * @param array $attributes
-     *
      * @return GooglePayPayment
      */
-    public function createGooglePayPayment(array $attributes = []): GooglePayPayment
+    public function createGooglePayPayment(): GooglePayPayment
     {
-        return new GooglePayPayment($attributes);
+        return new GooglePayPayment();
     }
 
     /**
-     * @param array $attributes
-     *
      * @return AcquiringPaymentOperation
      */
-    public function createPaymentOperation(array $attributes = []): AcquiringPaymentOperation
+    public function createPaymentOperation(): AcquiringPaymentOperation
     {
-        return new AcquiringPaymentOperation($attributes);
+        return new AcquiringPaymentOperation();
     }
 }

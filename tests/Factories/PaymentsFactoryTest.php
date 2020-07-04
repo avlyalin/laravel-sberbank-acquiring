@@ -34,14 +34,10 @@ class PaymentsFactoryTest extends TestCase
      */
     public function it_creates_new_acquiring_payment_model()
     {
-        $acquiringPayment = $this->factory->createAcquiringPayment([
-            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
-            'status_id' => DictAcquiringPaymentStatus::REGISTERED,
-        ]);
+        $acquiringPayment = $this->factory->createAcquiringPayment();
 
         $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
-        $this->assertEquals($acquiringPayment->system_id, DictAcquiringPaymentSystem::SBERBANK);
-        $this->assertEquals($acquiringPayment->status_id, DictAcquiringPaymentStatus::REGISTERED);
+        $this->assertFalse($acquiringPayment->exists);
     }
 
     /**
@@ -49,12 +45,10 @@ class PaymentsFactoryTest extends TestCase
      */
     public function it_creates_new_sberbank_payment_model()
     {
-        $sberbankPayment = $this->factory->createSberbankPayment([
-            'amount' => 100,
-            'return_url' => 'http://test-url.com',
-        ]);
+        $sberbankPayment = $this->factory->createSberbankPayment();
 
         $this->assertInstanceOf(SberbankPayment::class, $sberbankPayment);
+        $this->assertFalse($sberbankPayment->exists);
     }
 
     /**
@@ -62,12 +56,10 @@ class PaymentsFactoryTest extends TestCase
      */
     public function it_creates_new_apple_pay_payment_model()
     {
-        $applePayPayment = $this->factory->createApplePayPayment([
-            'order_number' => '5nvc8-41ncx4210',
-        ]);
+        $applePayPayment = $this->factory->createApplePayPayment();
 
         $this->assertInstanceOf(ApplePayPayment::class, $applePayPayment);
-        $this->assertEquals($applePayPayment->order_number, '5nvc8-41ncx4210');
+        $this->assertFalse($applePayPayment->exists);
     }
 
     /**
@@ -75,12 +67,10 @@ class PaymentsFactoryTest extends TestCase
      */
     public function it_creates_new_samsung_pay_payment_model()
     {
-        $samsungPayPayment = $this->factory->createSamsungPayPayment([
-            'order_number' => '9m14-cn532=vc',
-        ]);
+        $samsungPayPayment = $this->factory->createSamsungPayPayment();
 
         $this->assertInstanceOf(SamsungPayPayment::class, $samsungPayPayment);
-        $this->assertEquals($samsungPayPayment->order_number, '9m14-cn532=vc');
+        $this->assertFalse($samsungPayPayment->exists);
     }
 
     /**
@@ -88,16 +78,10 @@ class PaymentsFactoryTest extends TestCase
      */
     public function it_creates_new_google_pay_payment_model()
     {
-        $googlePayPayment = $this->factory->createGooglePayPayment([
-            'order_number' => '1vmc94-421mnvx',
-            'amount' => 1100,
-            'return_url' => 'http://test-url.com/google-pay',
-        ]);
+        $googlePayPayment = $this->factory->createGooglePayPayment();
 
         $this->assertInstanceOf(GooglePayPayment::class, $googlePayPayment);
-        $this->assertEquals($googlePayPayment->order_number, '1vmc94-421mnvx');
-        $this->assertEquals($googlePayPayment->amount, 1100);
-        $this->assertEquals($googlePayPayment->return_url, 'http://test-url.com/google-pay');
+        $this->assertFalse($googlePayPayment->exists);
     }
 
     /**
@@ -105,15 +89,9 @@ class PaymentsFactoryTest extends TestCase
      */
     public function it_creates_acquiring_payment_operation_model()
     {
-        $operation = $this->factory->createPaymentOperation([
-            'payment_id' => 144,
-            'user_id' => 1341,
-            'type_id' => DictAcquiringPaymentOperationType::REGISTER,
-        ]);
+        $operation = $this->factory->createPaymentOperation();
 
         $this->assertInstanceOf(AcquiringPaymentOperation::class, $operation);
-        $this->assertEquals($operation->payment_id, 144);
-        $this->assertEquals($operation->user_id, 1341);
-        $this->assertEquals($operation->type_id, DictAcquiringPaymentOperationType::REGISTER);
+        $this->assertFalse($operation->exists);
     }
 }
