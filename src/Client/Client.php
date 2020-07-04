@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Client;
 
-use Avlyalin\SberbankAcquiring\Exceptions\JsonException;
 use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
@@ -62,8 +61,8 @@ class Client
      *
      * @return AcquiringPayment
      *
-     * @throws JsonException
-     * @throws ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
      * @throws \InvalidArgumentException
      * @throws Throwable
      */
@@ -92,8 +91,8 @@ class Client
      *
      * @return AcquiringPayment
      *
-     * @throws JsonException
-     * @throws ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
      * @throws \InvalidArgumentException
      * @throws Throwable
      */
@@ -123,7 +122,8 @@ class Client
      *
      * @return AcquiringPayment
      *
-     * @throws JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
@@ -187,11 +187,12 @@ class Client
      * @param array $headers          Хэдеры HTTP-клиента
      *
      * @return AcquiringPayment
-     * @throws JsonException
-     * @throws ResponseProcessingException
-     * @throws Throwable
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws Throwable
      */
     public function reverse(
         int $acquiringPaymentId,
@@ -393,8 +394,9 @@ class Client
      * @param array $headers
      *
      * @return AcquiringPayment
-     * @throws JsonException
-     * @throws ResponseProcessingException
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
      * @throws \InvalidArgumentException
      * @throws Throwable
      */
