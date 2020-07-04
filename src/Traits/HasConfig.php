@@ -28,8 +28,10 @@ trait HasConfig
     public function getConfigParam(string $key)
     {
         $value = config("sberbank-acquiring.$key");
-        if (empty($value)) {
-            throw new Exception('Error: config/sberbank-acquiring.php not loaded and defaults could not be merged');
+        if (is_null($value)) {
+            throw new Exception(
+                "Error: cannot find key \"$key\" in config/sberbank-acquiring.php. Config may not be loaded."
+            );
         }
         return $value;
     }
