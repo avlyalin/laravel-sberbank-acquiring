@@ -6,8 +6,8 @@
 
     <rule ref="PSR12"/>
 
-    <rule ref="Squiz.Operators.ComparisonOperatorUsage">
-        <exclude name="Squiz.Operators.ComparisonOperatorUsage.ImplicitTrue"/>
+    <rule ref="Squiz.Operators.ComparisonOperatorUsage.NotAllowed">
+        <severity>0</severity>
     </rule>
 
     <rule ref="PSR1">
