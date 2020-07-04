@@ -53,6 +53,8 @@ class Client
     }
 
     /**
+     * Регистрация заказа
+     *
      * @param int $amount    Сумма платежа в минимальных единицах валюты
      * @param array $params  Дополнительные параметры
      * @param string $method Тип HTTP-запроса
@@ -81,6 +83,8 @@ class Client
     }
 
     /**
+     * Регистрация заказа с предавторизацией
+     *
      * @param int $amount    Сумма платежа в минимальных единицах валюты
      * @param array $params  Дополнительные параметры
      * @param string $method Тип HTTP-запроса
@@ -109,6 +113,8 @@ class Client
     }
 
     /**
+     * Запрос завершения оплаты заказа
+     *
      * @param int $acquiringPaymentId id модели платежа AcquiringPayment
      * @param int $amount             Сумма платежа в минимальных единицах валюты
      * @param array $params           Дополнительные параметры
@@ -171,16 +177,50 @@ class Client
         return $acquiringPayment;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function reverse(
         $orderId,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
     ): array {
-        // TODO: Implement reverse() method.
+        /** @var AcquiringPayment $acquiringPayment */
+        $acquiringPayment = $this->acquiringPaymentRepository->findOrFail($acquiringPaymentId);
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => Auth::id(),
+            'type_id' => DictAcquiringPaymentOperationType::DEPOSIT,
+            'request_json' => array_merge([
+                'orderId' => $acquiringPayment->bank_order_id,
+                'amount' => $amount,
+            ], $params),
+        ]);
+        $operation->saveOrFail();
+
+        $response = $this->apiClient->deposit(
+            $acquiringPayment->bank_order_id,
+            $amount,
+            $this->addAuthParams($params),
+            $method,
+            $headers
+        );
+
+        if ($response->isOk() === false) {
+            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+        }
+
+        $operationSaved = $operation->update([
+            'response_json' => $response->getResponseArray(),
+        ]);
+        if (!$operationSaved) {
+            $responseString = $response->getResponse();
+            throw new ResponseProcessingException(
+                "Error updating AcquiringPaymentOperation. Response: $responseString"
+            );
+        }
+
+        return $acquiringPayment;
     }
 
     /**
