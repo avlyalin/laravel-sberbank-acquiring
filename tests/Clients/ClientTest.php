@@ -202,24 +202,6 @@ class ClientTest extends TestCase
         $returnUrl = 'http://return-url';
         $failUrl = 'http://fail-url';
         $client->register($amount, ['returnUrl' => $returnUrl, 'failUrl' => $failUrl]);
-
-        $this->assertDatabaseHas($this->getTableName('payments'), [
-            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
-            'status_id' => DictAcquiringPaymentStatus::NEW,
-        ]);
-        $this->assertDatabaseHas($this->getTableName('sberbank_payments'), [
-            'amount' => $amount,
-            'return_url' => $returnUrl,
-            'fail_url' => $failUrl,
-        ]);
-        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
-            'user_id' => $user->getKey(),
-            'request_json' => json_encode([
-                'amount' => $amount,
-                'returnUrl' => $returnUrl,
-                'failUrl' => $failUrl,
-            ]),
-        ]);
     }
 
     /**
@@ -355,13 +337,6 @@ class ClientTest extends TestCase
         $client = $this->app->make(Client::class);
         $acquiringPayment = $this->createAcquiringPayment();
         $client->deposit($acquiringPayment->id, 5000);
-
-        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
-            'payment_id' => $acquiringPayment->id,
-            'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::DEPOSIT,
-            'request_json' => json_encode(['orderId' => $acquiringPayment->bank_order_id, 'amount' => 5000]),
-        ]);
     }
 
     /**
@@ -380,8 +355,10 @@ class ClientTest extends TestCase
         $this->setAuthParams($authParams);
         $expectedParams = array_merge($authParams, $params);
 
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::REGISTERED]);
+
         $this->mockApiClient('deposit', function (
-            $paymentId,
+            $requestPaymentId,
             $requestAmount,
             $requestParams,
             $requestMethod,
@@ -390,8 +367,10 @@ class ClientTest extends TestCase
             $amount,
             $method,
             $expectedParams,
-            $headers
+            $headers,
+            $acquiringPayment
         ) {
+            $this->assertEquals($acquiringPayment->bank_order_id, $requestPaymentId);
             $this->assertEquals($amount, $requestAmount);
             $this->assertEquals($expectedParams, $requestParams);
             $this->assertEquals($method, $requestMethod);
@@ -404,13 +383,13 @@ class ClientTest extends TestCase
 
         /** @var Client $client */
         $client = $this->app->make(Client::class);
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::REGISTERED]);
         $acquiringPayment = $client->deposit($acquiringPayment->id, $amount, $params, $method, $headers);
 
         $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
         $this->assertDatabaseHas($this->getTableName('payments'), [
             'id' => $acquiringPayment->id,
             'status_id' => $paymentStatusId,
+            'bank_order_id' => $acquiringPayment->bank_order_id,
         ]);
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
@@ -489,13 +468,6 @@ class ClientTest extends TestCase
         $client = $this->app->make(Client::class);
         $acquiringPayment = $this->createAcquiringPayment();
         $client->reverse($acquiringPayment->id);
-
-        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
-            'payment_id' => $acquiringPayment->id,
-            'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::REVERSE,
-            'request_json' => json_encode(['orderId' => $acquiringPayment->bank_order_id]),
-        ]);
     }
 
     /**
@@ -513,16 +485,20 @@ class ClientTest extends TestCase
         $this->setAuthParams($authParams);
         $expectedParams = array_merge($authParams, $params);
 
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::CONFIRMED]);
+
         $this->mockApiClient('reverse', function (
-            $paymentId,
+            $requestPaymentId,
             $requestParams,
             $requestMethod,
             $requestHeaders
         ) use (
             $method,
             $expectedParams,
-            $headers
+            $headers,
+            $acquiringPayment
         ) {
+            $this->assertEquals($acquiringPayment->bank_order_id, $requestPaymentId);
             $this->assertEquals($expectedParams, $requestParams);
             $this->assertEquals($method, $requestMethod);
             $this->assertEquals($headers, $requestHeaders);
@@ -534,13 +510,13 @@ class ClientTest extends TestCase
 
         /** @var Client $client */
         $client = $this->app->make(Client::class);
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::CONFIRMED]);
         $acquiringPayment = $client->reverse($acquiringPayment->id, $params, $method, $headers);
 
         $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
         $this->assertDatabaseHas($this->getTableName('payments'), [
             'id' => $acquiringPayment->id,
             'status_id' => $paymentStatusId,
+            'bank_order_id' => $acquiringPayment->bank_order_id,
         ]);
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
@@ -616,16 +592,6 @@ class ClientTest extends TestCase
         $client = $this->app->make(Client::class);
         $acquiringPayment = $this->createAcquiringPayment();
         $client->refund($acquiringPayment->id, 5000);
-
-        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
-            'payment_id' => $acquiringPayment->id,
-            'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::REFUND,
-            'request_json' => json_encode([
-                'orderId' => $acquiringPayment->bank_order_id,
-                'amount' => 5000,
-            ]),
-        ]);
     }
 
     /**
@@ -644,8 +610,10 @@ class ClientTest extends TestCase
         $this->setAuthParams($authParams);
         $expectedParams = array_merge($authParams, $params);
 
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::CONFIRMED]);
+
         $this->mockApiClient('refund', function (
-            $paymentId,
+            $requestPaymentId,
             $requestAmount,
             $requestParams,
             $requestMethod,
@@ -654,8 +622,10 @@ class ClientTest extends TestCase
             $amount,
             $method,
             $expectedParams,
-            $headers
+            $headers,
+            $acquiringPayment
         ) {
+            $this->assertEquals($acquiringPayment->bank_order_id, $requestPaymentId);
             $this->assertEquals($amount, $requestAmount);
             $this->assertEquals($expectedParams, $requestParams);
             $this->assertEquals($method, $requestMethod);
@@ -668,13 +638,13 @@ class ClientTest extends TestCase
 
         /** @var Client $client */
         $client = $this->app->make(Client::class);
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::CONFIRMED]);
         $acquiringPayment = $client->refund($acquiringPayment->id, $amount, $params, $method, $headers);
 
         $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
         $this->assertDatabaseHas($this->getTableName('payments'), [
             'id' => $acquiringPayment->id,
             'status_id' => $paymentStatusId,
+            'bank_order_id' => $acquiringPayment->bank_order_id,
         ]);
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
