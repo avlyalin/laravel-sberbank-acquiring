@@ -483,18 +483,76 @@ class Client
     }
 
     /**
-     * @inheritDoc
+     * Запрос оплаты через Google Pay
+     *
+     * @param string $paymentToken Токен, полученный от системы Google Pay
+     * @param int $amount          Сумма платежа в минимальных единицах валюты
+     * @param array $params        Необязательные параметры
+     * @param string $method       Тип HTTP-запроса
+     * @param array $headers       Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\AcquiringException
+     * @throws Throwable
      */
     public function payWithGooglePay(
-        string $merchant,
         string $paymentToken,
         int $amount,
-        string $returnUrl,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
-        // TODO: Implement payWithGooglePay() method.
+    ): AcquiringPayment {
+        $returnUrl = $this->getReturnUrl($params);
+        unset($params['returnUrl']);
+
+        $failUrl = $this->getFailUrl($params);
+        if (!is_null($failUrl)) {
+            $params['failUrl'] = $failUrl;
+        }
+
+        $fillableParams = array_merge([
+            'amount' => $amount,
+            'returnUrl' => $returnUrl,
+        ], $params);
+
+        $payment = $this->paymentsFactory->createGooglePayPayment();
+        $payment->fillWithSberbankParams($fillableParams);
+        $payment->setPaymentToken($paymentToken);
+        $payment->saveOrFail();
+
+        $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
+        $acquiringPayment->fill([
+            'system_id' => DictAcquiringPaymentSystem::GOOGLE_PAY,
+            'status_id' => DictAcquiringPaymentStatus::NEW,
+        ]);
+        $acquiringPayment->payment()->associate($payment);
+        $acquiringPayment->saveOrFail();
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'user_id' => Auth::id(),
+            'type_id' => DictAcquiringPaymentOperationType::GOOGLE_PAY_PAYMENT,
+            'request_json' => array_merge(['paymentToken' => $paymentToken], $fillableParams),
+        ]);
+        $operation->payment()->associate($acquiringPayment);
+        $operation->saveOrFail();
+
+        $response = $this->apiClient->payWithGooglePay(
+            $this->getConfigParam('merchant_login'),
+            $paymentToken,
+            $amount,
+            $returnUrl,
+            $params,
+            $method,
+            $headers
+        );
+
+        return $this->processResponse($response, $acquiringPayment, $operation);
     }
 
     /**
