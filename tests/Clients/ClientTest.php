@@ -13,6 +13,7 @@ use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Helpers\Currency;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
+use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
@@ -804,6 +805,134 @@ class ClientTest extends TestCase
         ]);
     }
 
+    /**
+     * @test
+     */
+    public function pay_with_apple_pay_method_uses_merchant_login_params_from_config()
+    {
+        $merchantLogin = 'test_merchant_login';
+        Config::set('sberbank-acquiring.merchant_login', $merchantLogin);
+
+        $this->mockApiClient(
+            'payWithApplePay',
+            function ($requestMerchantLogin) use ($merchantLogin) {
+                $this->assertEquals($merchantLogin, $requestMerchantLogin);
+                return true;
+            },
+            ['data' => ['orderId' => '1vc62']]
+        );
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->payWithApplePay('123abc');
+    }
+
+    /**
+     * @test
+     * @dataProvider pay_with_apple_pay_method_data_provider
+     */
+    public function pay_with_apple_pay_method_saves_payments_to_db_and_returns_response(
+        string $merchant,
+        string $paymentToken,
+        array $params,
+        string $method,
+        array $headers,
+        array $apiResponse,
+        int $operationStatusId
+    ) {
+        Config::set('sberbank-acquiring.merchant_login', $merchant);
+
+        $this->mockApiClient(
+            'payWithApplePay',
+            function (
+                $requestMerchant,
+                $requestPaymentToken,
+                $requestParams,
+                $requestMethod,
+                $requestHeaders
+            ) use (
+                $merchant,
+                $paymentToken,
+                $params,
+                $method,
+                $headers
+            ) {
+                $this->assertEquals($merchant, $requestMerchant);
+                $this->assertEquals($paymentToken, $requestPaymentToken);
+                $this->assertEquals($params, $requestParams);
+                $this->assertEquals($method, $requestMethod);
+                $this->assertEquals($headers, $requestHeaders);
+                return true;
+            },
+            $apiResponse
+        );
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $client->payWithApplePay($paymentToken, $params, $method, $headers);
+
+        $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
+        $this->assertInstanceOf(ApplePayPayment::class, $acquiringPayment->payment);
+        $this->assertInstanceOf(Collection::class, $acquiringPayment->operations);
+        $this->assertEquals(1, $acquiringPayment->operations->count());
+
+        $this->assertDatabaseHas($this->getTableName('payments'), [
+            'id' => $acquiringPayment->id,
+            'bank_order_id' => isset($apiResponse['data']) ? $apiResponse['data']['orderId'] : null,
+            'status_id' => $operationStatusId,
+            'system_id' => DictAcquiringPaymentSystem::APPLE_PAY,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('apple_pay_payments'), [
+            'order_number' => $params['orderNumber'] ?? null,
+            'description' => $params['description'] ?? null,
+            'language' => $params['language'] ?? null,
+            'additional_parameters' => isset($params['additionalParameters']) ? json_encode($params['additionalParameters']) : null,
+            'pre_auth' => $params['preAuth'] ?? null,
+            'payment_token' => $paymentToken,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::APPLE_PAY_PAYMENT,
+            'request_json' => json_encode(array_merge(['paymentToken' => $paymentToken], $params)),
+            'response_json' => json_encode($apiResponse),
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function pay_with_apple_pay_method_throws_exception_when_cannot_update_payment_models_with_response()
+    {
+        $this->expectException(ResponseProcessingException::class);
+        $this->expectExceptionMessage(
+            'Error updating AcquiringPayment. Error updating AcquiringPaymentOperation. Response: {"error":{"code":10}}'
+        );
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        $acquiringPayment = $this->mockAcquiringPayment('update', false);
+        $operation = $this->mockAcquiringPaymentOperation('update', false);
+
+        $factory = \Mockery::mock(PaymentsFactory::class)->makePartial();
+        $factory->shouldReceive('createAcquiringPayment')->andReturn($acquiringPayment);
+        $factory->shouldReceive('createPaymentOperation')->andReturn($operation);
+        $this->app->instance(PaymentsFactory::class, $factory);
+
+        $this->mockApiClient('payWithApplePay', function () {
+            return true;
+        },
+            ['error' => ['code' => 10]]);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->payWithApplePay('123');
+    }
+
     public function register_method_data_provider()
     {
         yield [1000, 'http://pay.test.com/pay', [
@@ -1085,6 +1214,79 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+    }
+
+    public function pay_with_apple_pay_method_data_provider()
+    {
+        yield [
+            'login_31vc-vcx1',
+            'v01-bc123vds-x',
+            ['language' => 'EN'],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['data' => ['orderId' => 'np-qe_41sjkg']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_123',
+            '91,041vx123-15bcx1241',
+            [],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['data' => ['orderId' => '1cx031vc14']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_123_abc',
+            '12m-x41nvd142',
+            ['description' => 'order description', 'preAuth' => 'true'],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'text/plain'],
+            ['data' => ['orderId' => '1cx031vc14']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_123_abc',
+            '194c014245152mc',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'false',
+                'language' => 'RU',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+            ],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'text/html'],
+            ['data' => ['orderId' => 'bvc914mvcx']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_123_abc',
+            '194c014245152mc',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'false',
+                'language' => 'RU',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+            ],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'text/html'],
+            ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+        yield [
+            'login_123_abc',
+            '194c014245152mc',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'false',
+                'language' => 'RU',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+            ],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'text/html'],
+            ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
             DictAcquiringPaymentStatus::ERROR,
         ];
     }

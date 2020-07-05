@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Client;
 
+use Avlyalin\SberbankAcquiring\Exceptions\HttpClientException;
+use Avlyalin\SberbankAcquiring\Exceptions\JsonException;
+use Avlyalin\SberbankAcquiring\Exceptions\NetworkException;
 use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperation;
 use Avlyalin\SberbankAcquiring\Repositories\DictAcquiringPaymentStatusRepository;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
@@ -14,8 +18,10 @@ use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Throwable;
 
 class Client
@@ -375,16 +381,53 @@ class Client
     }
 
     /**
-     * @inheritDoc
+     * Запрос оплаты через Apple Pay
+     *
+     * @param string $paymentToken Токен, полученный от системы Apple Pay
+     * @param array $params        Необязательные параметры
+     * @param string $method       Тип HTTP-запроса
+     * @param array $headers       Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws Throwable
      */
     public function payWithApplePay(
-        string $merchant,
         string $paymentToken,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
-        // TODO: Implement payWithApplePay() method.
+    ): AcquiringPayment {
+        $payment = $this->paymentsFactory->createApplePayPayment();
+        $payment->fillWithSberbankParams($params);
+        $payment->setPaymentToken($paymentToken);
+        $payment->saveOrFail();
+
+        $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
+        $acquiringPayment->fill([
+            'system_id' => DictAcquiringPaymentSystem::APPLE_PAY,
+            'status_id' => DictAcquiringPaymentStatus::NEW,
+        ]);
+        $acquiringPayment->payment()->associate($payment);
+        $acquiringPayment->saveOrFail();
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'user_id' => Auth::id(),
+            'type_id' => DictAcquiringPaymentOperationType::APPLE_PAY_PAYMENT,
+            'request_json' => array_merge(['paymentToken' => $paymentToken], $params),
+        ]);
+        $operation->payment()->associate($acquiringPayment);
+        $operation->saveOrFail();
+
+        $merchantLogin = $this->getConfigParam('merchant_login');
+        $response = $this->apiClient->payWithApplePay($merchantLogin, $paymentToken, $params, $method, $headers);
+
+        return $this->processResponse($response, $acquiringPayment, $operation);
     }
 
     /**
@@ -605,5 +648,52 @@ class Client
             $authParams = ['token' => $auth['token']];
         }
         return array_merge($authParams, $params);
+    }
+
+    /**
+     * Обработка ответа
+     *
+     * @param SberbankResponse $response
+     * @param AcquiringPayment $acquiringPayment
+     * @param AcquiringPaymentOperation $operation
+     *
+     * @return AcquiringPayment
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     */
+    private function processResponse(
+        SberbankResponse $response,
+        AcquiringPayment $acquiringPayment,
+        AcquiringPaymentOperation $operation
+    ): AcquiringPayment {
+        $errorMessage = '';
+
+        $responseData = $response->getResponseArray();
+
+        if ($response->isOk()) {
+            // Не меняем статус заказа в случае успешной операции, т.к. он м.б. разным
+            $acquiringPaymentSaved = $acquiringPayment->update([
+                'bank_order_id' => $responseData['data']['orderId'],
+            ]);
+        } else {
+            $acquiringPaymentSaved = $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+        }
+
+        if (!$acquiringPaymentSaved) {
+            $errorMessage .= 'Error updating AcquiringPayment. ';
+        }
+
+        $operationSaved = $operation->update(['response_json' => $responseData]);
+        if (!$operationSaved) {
+            $errorMessage .= 'Error updating AcquiringPaymentOperation. ';
+        }
+
+        if (!empty($errorMessage)) {
+            $response = (string)$response->getResponse();
+            throw new ResponseProcessingException($errorMessage . "Response: $response");
+        }
+
+        return $acquiringPayment;
     }
 }
