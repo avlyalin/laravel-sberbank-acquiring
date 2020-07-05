@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 $factory->define(AcquiringPayment::class, function () {
     return [
         'bank_order_id' => Str::random(36),
-        'system_id' => DictAcquiringPaymentSystem::all()->random()->id,
+        'system_id' => DictAcquiringPaymentSystem::SBERBANK,
         'status_id' => DictAcquiringPaymentStatus::all()->random()->id,
         'payment_type' => SberbankPayment::class,
         'payment_id' => factory(SberbankPayment::class)->create()->id,
@@ -23,6 +23,7 @@ $factory->define(AcquiringPayment::class, function () {
 
 $factory->state(AcquiringPayment::class, 'sberbank', function () {
     return [
+        'system_id' => DictAcquiringPaymentSystem::SBERBANK,
         'payment_type' => SberbankPayment::class,
         'payment_id' => factory(SberbankPayment::class)->create()->id,
     ];
@@ -30,6 +31,7 @@ $factory->state(AcquiringPayment::class, 'sberbank', function () {
 
 $factory->state(AcquiringPayment::class, 'applePay', function () {
     return [
+        'system_id' => DictAcquiringPaymentSystem::APPLE_PAY,
         'payment_type' => ApplePayPayment::class,
         'payment_id' => factory(ApplePayPayment::class)->create()->id,
     ];
@@ -37,6 +39,7 @@ $factory->state(AcquiringPayment::class, 'applePay', function () {
 
 $factory->state(AcquiringPayment::class, 'samsungPay', function () {
     return [
+        'system_id' => DictAcquiringPaymentSystem::SAMSUNG_PAY,
         'payment_type' => SamsungPayPayment::class,
         'payment_id' => factory(SamsungPayPayment::class)->create()->id,
     ];
@@ -44,6 +47,7 @@ $factory->state(AcquiringPayment::class, 'samsungPay', function () {
 
 $factory->state(AcquiringPayment::class, 'googlePay', function () {
     return [
+        'system_id' => DictAcquiringPaymentSystem::GOOGLE_PAY,
         'payment_type' => GooglePayPayment::class,
         'payment_id' => factory(GooglePayPayment::class)->create()->id,
     ];
