@@ -17,6 +17,7 @@ use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
+use Avlyalin\SberbankAcquiring\Models\GooglePayPayment;
 use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
 use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
@@ -906,6 +907,37 @@ class ClientTest extends TestCase
     /**
      * @test
      */
+    public function pay_with_apple_pay_method_throws_exception_when_cannot_update_payment_models_with_response()
+    {
+        $this->expectException(ResponseProcessingException::class);
+        $this->expectExceptionMessage(
+            'Error updating AcquiringPayment. Error updating AcquiringPaymentOperation. Response: {"error":{"code":10}}'
+        );
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        $acquiringPayment = $this->mockAcquiringPayment('update', false);
+        $operation = $this->mockAcquiringPaymentOperation('update', false);
+
+        $factory = \Mockery::mock(PaymentsFactory::class)->makePartial();
+        $factory->shouldReceive('createAcquiringPayment')->andReturn($acquiringPayment);
+        $factory->shouldReceive('createPaymentOperation')->andReturn($operation);
+        $this->app->instance(PaymentsFactory::class, $factory);
+
+        $this->mockApiClient('payWithApplePay', function () {
+            return true;
+        },
+            ['error' => ['code' => 10]]);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->payWithApplePay('123');
+    }
+
+    /**
+     * @test
+     */
     public function pay_with_samsung_pay_method_uses_merchant_login_params_from_config()
     {
         $merchantLogin = 'merchant_login';
@@ -1005,11 +1037,11 @@ class ClientTest extends TestCase
     /**
      * @test
      */
-    public function pay_with_apple_pay_method_throws_exception_when_cannot_update_payment_models_with_response()
+    public function pay_with_samsung_pay_method_throws_exception_when_cannot_update_payment_models_with_response()
     {
         $this->expectException(ResponseProcessingException::class);
         $this->expectExceptionMessage(
-            'Error updating AcquiringPayment. Error updating AcquiringPaymentOperation. Response: {"error":{"code":10}}'
+            'Error updating AcquiringPayment. Error updating AcquiringPaymentOperation. Response: {"error":{"code":20}}'
         );
 
         $user = $this->createUser();
@@ -1023,14 +1055,192 @@ class ClientTest extends TestCase
         $factory->shouldReceive('createPaymentOperation')->andReturn($operation);
         $this->app->instance(PaymentsFactory::class, $factory);
 
-        $this->mockApiClient('payWithApplePay', function () {
+        $this->mockApiClient('payWithSamsungPay', function () {
             return true;
         },
-            ['error' => ['code' => 10]]);
+            ['error' => ['code' => 20]]);
 
         /** @var Client $client */
         $client = $this->app->make(Client::class);
-        $client->payWithApplePay('123');
+        $client->payWithSamsungPay('123');
+    }
+
+    /**
+     * @test
+     */
+    public function pay_with_google_pay_method_can_use_config_params()
+    {
+        Config::set('sberbank-acquiring.params.return_url', 'http://return-url');
+        Config::set('sberbank-acquiring.params.fail_url', 'http://fail-url');
+
+        $this->mockApiClient(
+            'payWithGooglePay',
+            function ($merchant, $token, $amount, $returnUrl, $params) {
+                $this->assertEquals('http://return-url', $returnUrl);
+                $this->assertEquals('http://fail-url', $params['failUrl']);
+                return true;
+            },
+            ['data' => ['orderId' => 'vcx1v']]
+        );
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->payWithGooglePay('123abc', 100);
+    }
+
+    /**
+     * @test
+     */
+    public function pay_with_google_pay_method_omits_config_params_when_they_present_in_args()
+    {
+        Config::set('sberbank-acquiring.params.return_url', 'http://bad-return-url');
+        Config::set('sberbank-acquiring.params.fail_url', 'http://bad-fail-url');
+
+        $this->mockApiClient(
+            'payWithGooglePay',
+            function ($merchant, $token, $amount, $returnUrl, $params) {
+                $this->assertEquals('http://return-url', $returnUrl);
+                $this->assertEquals('http://fail-url', $params['failUrl']);
+                return true;
+            },
+            ['data' => ['orderId' => 'vcx1v']]
+        );
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->payWithGooglePay('123abc', 100, ['returnUrl' => 'http://return-url', 'failUrl' => 'http://fail-url']);
+    }
+
+    /**
+     * @test
+     * @dataProvider pay_with_google_pay_method_data_provider
+     */
+    public function pay_with_google_pay_method_saves_payments_to_db_and_returns_response(
+        string $merchant,
+        string $paymentToken,
+        int $amount,
+        string $returnUrl,
+        array $params,
+        string $method,
+        array $headers,
+        array $apiResponse,
+        int $operationStatusId
+    ) {
+        Config::set('sberbank-acquiring.merchant_login', $merchant);
+
+        $this->mockApiClient(
+            'payWithGooglePay',
+            function (
+                $requestMerchant,
+                $requestPaymentToken,
+                $requestAmount,
+                $requestReturnUrl,
+                $requestParams,
+                $requestMethod,
+                $requestHeaders
+            ) use (
+                $merchant,
+                $paymentToken,
+                $amount,
+                $returnUrl,
+                $params,
+                $method,
+                $headers
+            ) {
+                $this->assertEquals($amount, $requestAmount);
+                $this->assertEquals($returnUrl, $requestReturnUrl);
+                $this->assertEquals($merchant, $requestMerchant);
+                $this->assertEquals($paymentToken, $requestPaymentToken);
+                $this->assertEquals($params, $requestParams);
+                $this->assertEquals($method, $requestMethod);
+                $this->assertEquals($headers, $requestHeaders);
+                return true;
+            },
+            $apiResponse
+        );
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $client->payWithGooglePay(
+            $paymentToken,
+            $amount,
+            array_merge(['returnUrl' => $returnUrl,], $params),
+            $method,
+            $headers
+        );
+
+        $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
+        $this->assertInstanceOf(GooglePayPayment::class, $acquiringPayment->payment);
+        $this->assertInstanceOf(Collection::class, $acquiringPayment->operations);
+        $this->assertEquals(1, $acquiringPayment->operations->count());
+
+        $this->assertDatabaseHas($this->getTableName('payments'), [
+            'id' => $acquiringPayment->id,
+            'bank_order_id' => isset($apiResponse['data']) ? $apiResponse['data']['orderId'] : null,
+            'status_id' => $operationStatusId,
+            'system_id' => DictAcquiringPaymentSystem::GOOGLE_PAY,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('google_pay_payments'), [
+            'order_number' => $params['orderNumber'] ?? null,
+            'amount' => $amount,
+            'description' => $params['description'] ?? null,
+            'language' => $params['language'] ?? null,
+            'additional_parameters' => isset($params['additionalParameters']) ? json_encode($params['additionalParameters']) : null,
+            'pre_auth' => $params['preAuth'] ?? null,
+            'payment_token' => $paymentToken,
+            'client_id' => $params['clientId'] ?? null,
+            'ip' => $params['ip'] ?? null,
+            'email' => $params['email'] ?? null,
+            'phone' => $params['phone'] ?? null,
+            'return_url' => $returnUrl,
+            'fail_url' => $params['failUrl'] ?? null,
+            'currency_code' => $params['currencyCode'] ?? null,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::GOOGLE_PAY_PAYMENT,
+            'request_json' => json_encode(array_merge([
+                'paymentToken' => $paymentToken,
+                'amount' => $amount,
+                'returnUrl' => $returnUrl,
+                ], $params)),
+            'response_json' => json_encode($apiResponse),
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function pay_with_google_pay_method_throws_exception_when_cannot_update_payment_models_with_response()
+    {
+        $this->expectException(ResponseProcessingException::class);
+        $this->expectExceptionMessage(
+            'Error updating AcquiringPayment. Error updating AcquiringPaymentOperation. Response: {"error":{"code":30}}'
+        );
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        $acquiringPayment = $this->mockAcquiringPayment('update', false);
+        $operation = $this->mockAcquiringPaymentOperation('update', false);
+
+        $factory = \Mockery::mock(PaymentsFactory::class)->makePartial();
+        $factory->shouldReceive('createAcquiringPayment')->andReturn($acquiringPayment);
+        $factory->shouldReceive('createPaymentOperation')->andReturn($operation);
+        $this->app->instance(PaymentsFactory::class, $factory);
+
+        $this->mockApiClient('payWithGooglePay', function () {
+            return true;
+        },
+            ['error' => ['code' => 30]]);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->payWithGooglePay('123', 100);
     }
 
     public function register_method_data_provider()
@@ -1428,7 +1638,7 @@ class ClientTest extends TestCase
                 'preAuth' => 'true',
                 'language' => 'IT',
                 'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
-                'clientId' => '123cx13478'
+                'clientId' => '123cx13478',
             ],
             HttpClientInterface::METHOD_POST,
             ['content-type' => 'application/x-www-form-urlencoded'],
@@ -1460,6 +1670,111 @@ class ClientTest extends TestCase
                 'language' => 'DE',
                 'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
                 'ip' => '10.10.10.10',
+            ],
+            HttpClientInterface::METHOD_POST,
+            ['content-type' => 'application/x-www-form-urlencoded'],
+            ['error' => ['code' => 20, 'message' => 'unknown error occurred!']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+    }
+
+    public function pay_with_google_pay_method_data_provider()
+    {
+        yield [
+            'login_18nvc',
+            '91vc-13vxza',
+            1000,
+            'http://return-url',
+            ['language' => 'RU'],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['data' => ['orderId' => 'v9xcm13vc']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_g9m141-0vc',
+            '90vmvc2-51cv',
+            2500,
+            'http://test-pay.test/success',
+            [],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['data' => ['orderId' => '9vck14vc']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_1041',
+            '0bvc14vc-12cv',
+            15061,
+            'https://test-url.com/api/success',
+            [
+                'description' => 'order description',
+                'preAuth' => 'true',
+                'ip' => '10.10.10.10',
+                'phone' => '79998887766',
+                'failUrl' => 'https://test-url.com/fail',
+            ],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'application/json'],
+            ['data' => ['orderId' => 'vc9143vc']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_v813vcxz',
+            '031mbc-31c_142vcx',
+            4000,
+            'https://some-return-url.com/api',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'true',
+                'language' => 'RU',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+                'clientId' => '123cx13478',
+                'currencyCode' => Currency::RUB,
+            ],
+            HttpClientInterface::METHOD_POST,
+            ['content-type' => 'application/x-www-form-urlencoded'],
+            ['data' => ['orderId' => 'vcx09123x']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_123_abc',
+            '194c014245152mc',
+            500,
+            'https://pay.test.com/api/success?id=14mvcx123',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'false',
+                'language' => 'EN',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+                'clientId' => 'vc14242bc',
+                'ip' => '10.10.10.10',
+                'phone' => '+79998887766',
+                'email' => 'test@test.test',
+                'currencyCode' => Currency::EUR,
+                'failUrl' => 'https://pay.test.com/api/fail?id=14mvcx123',
+            ],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'text/html'],
+            ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+        yield [
+            'login_bc9814cvx',
+            '913mvc-123-c_41vdx',
+            150,
+            'https://test-pay.com/success?orderId=13vcx142',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'false',
+                'language' => 'EN',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+                'ip' => '10.10.10.10',
+                'phone' => '+79998887766',
+                'email' => 'user@some-domain.com',
+                'currencyCode' => Currency::USD,
+                'failUrl' => 'https://test-pay.com/fail?orderId=13vcx142',
+                'clientId' => '19cxm,143-vc',
             ],
             HttpClientInterface::METHOD_POST,
             ['content-type' => 'application/x-www-form-urlencoded'],
