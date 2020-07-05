@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Avlyalin\SberbankAcquiring\Client;
 
 use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
+use Avlyalin\SberbankAcquiring\Repositories\DictAcquiringPaymentStatusRepository;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
@@ -33,6 +34,10 @@ class Client
      * @var AcquiringPaymentRepository
      */
     private $acquiringPaymentRepository;
+    /**
+     * @var DictAcquiringPaymentStatusRepository
+     */
+    private $acquiringPaymentStatusRepository;
 
     /**
      * Client constructor.
@@ -40,15 +45,18 @@ class Client
      * @param ApiClientInterface $apiClient
      * @param PaymentsFactory $paymentsFactory
      * @param AcquiringPaymentRepository $acquiringPaymentRepository
+     * @param DictAcquiringPaymentStatusRepository $acquiringPaymentStatusRepository
      */
     public function __construct(
         ApiClientInterface $apiClient,
         PaymentsFactory $paymentsFactory,
-        AcquiringPaymentRepository $acquiringPaymentRepository
+        AcquiringPaymentRepository $acquiringPaymentRepository,
+        DictAcquiringPaymentStatusRepository $acquiringPaymentStatusRepository
     ) {
         $this->apiClient = $apiClient;
         $this->paymentsFactory = $paymentsFactory;
         $this->acquiringPaymentRepository = $acquiringPaymentRepository;
+        $this->acquiringPaymentStatusRepository = $acquiringPaymentStatusRepository;
     }
 
     /**
@@ -302,16 +310,69 @@ class Client
         return $acquiringPayment;
     }
 
-
     /**
-     * @inheritDoc
+     * Получение статуса заказа
+     *
+     * @param int $acquiringPaymentId id модели платежа AcquiringPayment
+     * @param array $params           Параметры
+     * @param string $method          Тип HTTP-запроса
+     * @param array $headers          Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NotFoundOrderException
+     * @throws Throwable
      */
     public function getOrderStatusExtended(
+        int $acquiringPaymentId,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
-        // TODO: Implement getOrderStatusExtended() method.
+    ): AcquiringPayment {
+        /** @var AcquiringPayment $acquiringPayment */
+        $acquiringPayment = $this->acquiringPaymentRepository->findOrFail($acquiringPaymentId);
+
+        $requestParams = array_merge(['orderId' => $acquiringPayment->bank_order_id], $params);
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => Auth::id(),
+            'type_id' => DictAcquiringPaymentOperationType::GET_EXTENDED_STATUS,
+            'request_json' => $requestParams,
+        ]);
+        $operation->saveOrFail();
+
+        $response = $this->apiClient->getOrderStatusExtended($this->addAuthParams($requestParams), $method, $headers);
+
+        $responseData = $response->getResponseArray();
+
+        if ($response->isOk()) {
+            $bankStatusId = (int)$responseData['orderStatus'];
+            $dictOrderStatus = $this->acquiringPaymentStatusRepository->findByBankId($bankStatusId);
+            if (!$dictOrderStatus) {
+                throw new ResponseProcessingException("Unknown \"orderStatus\" \"$bankStatusId\" found in response");
+            }
+            $acquiringPayment->update(['status_id' => $dictOrderStatus->id]);
+        } else {
+            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+        }
+
+        $operationSaved = $operation->update([
+            'response_json' => $responseData,
+        ]);
+        if (!$operationSaved) {
+            $responseString = $response->getResponse();
+            throw new ResponseProcessingException(
+                "Error updating AcquiringPaymentOperation. Response: $responseString"
+            );
+        }
+
+        return $acquiringPayment;
     }
 
     /**

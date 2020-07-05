@@ -658,6 +658,152 @@ class ClientTest extends TestCase
         ]);
     }
 
+    /**
+     * @test
+     * @dataProvider auth_params_data_provider
+     */
+    public function get_order_status_extended_method_uses_auth_params_from_config(array $authParams)
+    {
+        Config::set('sberbank-acquiring.auth', $authParams);
+
+        $this->mockApiClient(
+            'getOrderStatusExtended',
+            function ($requestParams) use ($authParams) {
+                $this->assertEquals($authParams, array_intersect($authParams, $requestParams));
+                return true;
+            },
+            ['errorCode' => 0, 'orderStatus' => 1]
+        );
+
+        $acquiringPayment = $this->createAcquiringPayment();
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->getOrderStatusExtended($acquiringPayment->id);
+    }
+
+    /**
+     * @test
+     */
+    public function get_order_status_extended_method_throws_exception_when_gets_non_existing_payment_id()
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->mockApiClient('getOrderStatusExtended', function () {
+            return true;
+        }, ['errorCode' => 0, 'orderStatus' => 0]);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->getOrderStatusExtended(99);
+    }
+
+    /**
+     * @test
+     */
+    public function get_order_status_extended_method_throws_exception_when_receives_unknown_status_id()
+    {
+        $this->expectException(ResponseProcessingException::class);
+        $this->expectExceptionMessage("Unknown \"orderStatus\" \"10\" found in response");
+
+        $this->mockApiClient('getOrderStatusExtended', function () {
+            return true;
+        }, ['errorCode' => 0, 'orderStatus' => 10]);
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $this->createAcquiringPayment();
+        $client->getOrderStatusExtended($acquiringPayment->id);
+    }
+
+    /**
+     * @test
+     */
+    public function get_order_status_extended_method_throws_exception_and_sets_error_status_when_cannot_save_response()
+    {
+        $this->expectException(ResponseProcessingException::class);
+        $this->expectExceptionMessage(
+            "Error updating AcquiringPaymentOperation. Response: {\"errorCode\":0,\"orderStatus\":1}"
+        );
+
+        $operation = $this->mockAcquiringPaymentOperation('update', false);
+
+        $factory = \Mockery::mock(PaymentsFactory::class)->makePartial();
+        $factory->shouldReceive('createPaymentOperation')->andReturn($operation);
+        $this->app->instance(PaymentsFactory::class, $factory);
+
+        $this->mockApiClient('getOrderStatusExtended', function () {
+            return true;
+        }, ['errorCode' => 0, 'orderStatus' => 1]);
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::NEW]);
+        $client->getOrderStatusExtended($acquiringPayment->id);
+    }
+
+    /**
+     * @test
+     * @dataProvider get_order_status_extended_method_data_provider
+     */
+    public function get_order_status_extended_method_saves_operation_to_db_and_returns_updated_payment(
+        array $params,
+        array $authParams,
+        string $method,
+        array $headers,
+        array $response,
+        int $newPaymentStatusId
+    ) {
+        $this->setAuthParams($authParams);
+
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::NEW]);
+
+        $expectedParams = array_merge(['orderId' => $acquiringPayment->bank_order_id], $authParams, $params);
+
+        $this->mockApiClient('getOrderStatusExtended', function (
+            $requestParams,
+            $requestMethod,
+            $requestHeaders
+        ) use (
+            $method,
+            $expectedParams,
+            $headers
+        ) {
+            $this->assertEquals($expectedParams, $requestParams);
+            $this->assertEquals($method, $requestMethod);
+            $this->assertEquals($headers, $requestHeaders);
+            return true;
+        }, $response);
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $client->getOrderStatusExtended($acquiringPayment->id, $params, $method, $headers);
+
+        $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
+        $this->assertDatabaseHas($this->getTableName('payments'), [
+            'id' => $acquiringPayment->id,
+            'status_id' => $newPaymentStatusId,
+            'bank_order_id' => $acquiringPayment->bank_order_id,
+            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::GET_EXTENDED_STATUS,
+            'request_json' => json_encode(array_merge(['orderId' => $acquiringPayment->bank_order_id], $params)),
+            'response_json' => json_encode($response),
+        ]);
+    }
+
     public function register_method_data_provider()
     {
         yield [1000, 'http://pay.test.com/pay', [
@@ -863,6 +1009,82 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 10, 'message' => 'success']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+    }
+
+    public function get_order_status_extended_method_data_provider()
+    {
+        yield [
+            ['language' => 'DE'],
+            ['token' => 'test_token'],
+            HttpClientInterface::METHOD_POST,
+            ['header-1' => 'header-1-value'],
+            ['errorCode' => 0, 'orderStatus' => 0],
+            DictAcquiringPaymentStatus::REGISTERED,
+        ];
+        yield [
+            [],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_POST,
+            ['header-2' => 'header-2-value'],
+            ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 1],
+            DictAcquiringPaymentStatus::HELD,
+        ];
+        yield [
+            ['language' => 'EN', 'additional_param' => 'value'],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 2],
+            DictAcquiringPaymentStatus::CONFIRMED,
+        ];
+        yield [
+            ['language' => 'EN', 'additional_param' => 'value'],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 3],
+            DictAcquiringPaymentStatus::REVERSED,
+        ];
+        yield [
+            ['language' => 'EN', 'additional_param' => 'value'],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 4],
+            DictAcquiringPaymentStatus::REFUNDED,
+        ];
+        yield [
+            ['language' => 'EN', 'additional_param' => 'value'],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 5],
+            DictAcquiringPaymentStatus::ACS_AUTH,
+        ];
+        yield [
+            ['language' => 'EN', 'additional_param' => 'value'],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 6],
+            DictAcquiringPaymentStatus::AUTH_DECLINED,
+        ];
+        yield [
+            ['language' => 'EN', 'additional_param' => 'value'],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_GET,
+            [],
+            ['error' => ['code' => 10]],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+        yield [
+            ['language' => 'EN'],
+            ['userName' => 'test_userName', 'password' => 'test_password'],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
             DictAcquiringPaymentStatus::ERROR,
         ];
     }
