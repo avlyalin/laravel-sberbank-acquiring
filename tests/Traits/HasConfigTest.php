@@ -2,6 +2,7 @@
 
 namespace Avlyalin\SberbankAcquiring\Tests\Traits;
 
+use Avlyalin\SberbankAcquiring\Exceptions\AcquiringException;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Illuminate\Support\Facades\Config;
@@ -31,7 +32,7 @@ class HasConfigTest extends TestCase
 
         $mock = $this->getMockForHasConfigTrait();
 
-        $this->expectException(\Exception::class);
+        $this->expectException(AcquiringException::class);
         $mock->getTableName('payment');
     }
 

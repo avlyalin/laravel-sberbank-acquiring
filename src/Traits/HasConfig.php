@@ -2,6 +2,7 @@
 
 namespace Avlyalin\SberbankAcquiring\Traits;
 
+use Avlyalin\SberbankAcquiring\Exceptions\AcquiringException;
 use Exception;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
@@ -45,13 +46,13 @@ trait HasConfig
      * @param string $key
      *
      * @return Repository|Application|mixed
-     * @throws Exception
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\AcquiringException
      */
     public function getConfigParam(string $key)
     {
         $value = config("sberbank-acquiring.$key");
         if (is_null($value)) {
-            throw new Exception(
+            throw new AcquiringException(
                 "Error: cannot find key \"$key\" in config/sberbank-acquiring.php. Config may not be loaded."
             );
         }
