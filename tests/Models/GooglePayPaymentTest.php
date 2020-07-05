@@ -64,4 +64,27 @@ class GooglePayPaymentTest extends TestCase
             'fail_url' => 'http://test.com/api/error',
         ], $payment->getAttributes());
     }
+
+    /**
+     * @test
+     */
+    public function it_has_not_fillable_payment_token()
+    {
+        $payment = new GooglePayPayment();
+        $payment->fill(['payment_token' => 'some-string']);
+
+        $this->assertEmpty($payment->payment_token);
+    }
+
+    /**
+     * @test
+     */
+    public function it_has_hidden_payment_token()
+    {
+        $payment = new GooglePayPayment();
+        $payment->payment_token = 'some-string';
+
+        $this->assertNotEmpty($payment->payment_token);
+        $this->assertArrayNotHasKey('payment_token', $payment->toArray());
+    }
 }

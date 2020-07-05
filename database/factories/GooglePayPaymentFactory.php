@@ -22,5 +22,6 @@ $factory->define(GooglePayPayment::class, function (Faker $faker) {
         'phone' => $faker->phoneNumber,
         'return_url' => $faker->url,
         'fail_url' => $faker->url,
+        'payment_token' => Str::random(100),
     ];
 });

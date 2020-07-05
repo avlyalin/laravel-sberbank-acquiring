@@ -50,4 +50,27 @@ class SamsungPayPaymentTest extends TestCase
             'ip' => '10.10.10.10',
         ], $payment->getAttributes());
     }
+
+    /**
+     * @test
+     */
+    public function it_has_not_fillable_payment_token()
+    {
+        $payment = new SamsungPayPayment();
+        $payment->fill(['payment_token' => 'some-string']);
+
+        $this->assertEmpty($payment->payment_token);
+    }
+
+    /**
+     * @test
+     */
+    public function it_has_hidden_payment_token()
+    {
+        $payment = new SamsungPayPayment();
+        $payment->payment_token = 'some-string';
+
+        $this->assertNotEmpty($payment->payment_token);
+        $this->assertArrayNotHasKey('payment_token', $payment->toArray());
+    }
 }

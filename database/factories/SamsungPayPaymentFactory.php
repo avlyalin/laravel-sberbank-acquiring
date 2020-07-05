@@ -16,5 +16,6 @@ $factory->define(SamsungPayPayment::class, function (Faker $faker) {
         'pre_auth' => $faker->randomElement(['true', 'false']),
         'client_id' => Str::random(30),
         'ip' => $faker->ipv6,
+        'payment_token' => Str::random(100),
     ];
 });

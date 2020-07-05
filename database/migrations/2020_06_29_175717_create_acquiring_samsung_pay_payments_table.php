@@ -19,9 +19,8 @@ class CreateAcquiringSamsungPayPaymentsTable extends Migration
     public function up()
     {
         $tableName = $this->getTableName('samsung_pay_payments');
-        $basePaymentsTableName = $this->getTableName('payments');
 
-        Schema::create($tableName, function (Blueprint $table) use ($tableName, $basePaymentsTableName) {
+        Schema::create($tableName, function (Blueprint $table) use ($tableName) {
             $table->bigIncrements('id');
             $table->string('order_number', 32)->comment('Номер заказа');
             $table->string('description', 512)->nullable()->comment('Описание заказа');
@@ -31,6 +30,7 @@ class CreateAcquiringSamsungPayPaymentsTable extends Migration
                 ->comment('Параметр, определяющий необходимость предварительной авторизации');
             $table->string('client_id', 255)->nullable()->comment('Номер (идентификатор) клиента в системе продавца');
             $table->string('ip', 39)->nullable()->comment('IP-адрес покупателя');
+            $table->text('payment_token')->comment('Токен, полученный от Samsung Pay');
         });
     }
 

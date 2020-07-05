@@ -10,6 +10,10 @@ class GooglePayPayment extends BasePaymentModel
 
     public $timestamps = false;
 
+    protected $hidden = [
+        'payment_token',
+    ];
+
     protected $fillable = [
         'order_number',
         'description',

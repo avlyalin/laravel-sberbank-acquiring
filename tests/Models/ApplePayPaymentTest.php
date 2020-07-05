@@ -46,4 +46,27 @@ class ApplePayPaymentTest extends TestCase
             'pre_auth' => 'false',
         ], $payment->getAttributes());
     }
+
+    /**
+     * @test
+     */
+    public function it_has_not_fillable_payment_token()
+    {
+        $payment = new ApplePayPayment();
+        $payment->fill(['payment_token' => 'some-string']);
+
+        $this->assertEmpty($payment->payment_token);
+    }
+
+    /**
+     * @test
+     */
+    public function it_has_hidden_payment_token()
+    {
+        $payment = new ApplePayPayment();
+        $payment->payment_token = 'some-string';
+
+        $this->assertNotEmpty($payment->payment_token);
+        $this->assertArrayNotHasKey('payment_token', $payment->toArray());
+    }
 }

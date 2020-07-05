@@ -14,5 +14,6 @@ $factory->define(ApplePayPayment::class, function (Faker $faker) {
         'language' => $faker->languageCode,
         'additional_parameters' => json_encode([$faker->word => $faker->word, $faker->word => $faker->word]),
         'pre_auth' => $faker->randomElement(['true', 'false']),
+        'payment_token' => Str::random(100),
     ];
 });

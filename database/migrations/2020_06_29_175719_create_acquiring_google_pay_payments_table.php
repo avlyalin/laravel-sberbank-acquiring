@@ -19,9 +19,8 @@ class CreateAcquiringGooglePayPaymentsTable extends Migration
     public function up()
     {
         $tableName = $this->getTableName('google_pay_payments');
-        $basePaymentsTableName = $this->getTableName('payments');
 
-        Schema::create($tableName, function (Blueprint $table) use ($tableName, $basePaymentsTableName) {
+        Schema::create($tableName, function (Blueprint $table) use ($tableName) {
             $table->bigIncrements('id');
             $table->string('order_number', 32)->comment('Номер заказа');
             $table->string('description', 512)->nullable()->comment('Описание заказа');
@@ -37,6 +36,7 @@ class CreateAcquiringGooglePayPaymentsTable extends Migration
             $table->string('phone')->nullable()->comment('Номер телефона покупателя');
             $table->string('return_url', 512)->comment('Адрес для перехода в случае успешной оплаты');
             $table->string('fail_url', 512)->nullable()->comment('Адрес для перехода в случае неуспешной оплаты');
+            $table->text('payment_token')->comment('Токен, полученный от Google Pay');
         });
     }
 
