@@ -324,7 +324,6 @@ class Client
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
-     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NotFoundOrderException
      * @throws Throwable
      */
     public function getOrderStatusExtended(
