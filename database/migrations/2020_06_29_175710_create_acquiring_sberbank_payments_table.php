@@ -19,9 +19,8 @@ class CreateAcquiringSberbankPaymentsTable extends Migration
     public function up()
     {
         $tableName = $this->getTableName('sberbank_payments');
-        $basePaymentsTableName = $this->getTableName('payments');
 
-        Schema::create($tableName, function (Blueprint $table) use ($tableName, $basePaymentsTableName) {
+        Schema::create($tableName, function (Blueprint $table) use ($tableName) {
             $table->bigIncrements('id');
             $table->string('order_number', 32)->nullable()->comment('Номер заказа');
             $table->unsignedBigInteger('amount')->unsigned()->comment('Сумма платежа в минимальных единицах валюты');
