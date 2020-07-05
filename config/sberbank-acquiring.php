@@ -25,6 +25,11 @@ return [
         'token' => env('SBERBANK_TOKEN', ''),
     ],
 
+    /**
+     * Логин продавца в платёжном шлюзе
+     */
+    'merchant_login' => env('SBERBANK_MERCHANT_LOGIN', ''),
+
     'baseUri' => env('SBERBANK_URI', ''),
 
     'params' => [
