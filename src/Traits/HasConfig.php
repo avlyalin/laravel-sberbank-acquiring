@@ -20,6 +20,28 @@ trait HasConfig
     }
 
     /**
+     * Возвращает массив параметров для авторизации
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getConfigAuthParams(): array
+    {
+        return $this->getConfigParam('auth');
+    }
+
+    /**
+     * Возвращает логин продавца
+     *
+     * @return string
+     * @throws Exception
+     */
+    public function getConfigMerchantLoginParam(): string
+    {
+        return $this->getConfigParam('merchant_login');
+    }
+
+    /**
      * @param string $key
      *
      * @return Repository|Application|mixed
