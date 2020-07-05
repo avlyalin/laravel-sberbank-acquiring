@@ -17,6 +17,7 @@ use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
+use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
 use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
@@ -905,6 +906,105 @@ class ClientTest extends TestCase
     /**
      * @test
      */
+    public function pay_with_samsung_pay_method_uses_merchant_login_params_from_config()
+    {
+        $merchantLogin = 'merchant_login';
+        Config::set('sberbank-acquiring.merchant_login', $merchantLogin);
+
+        $this->mockApiClient(
+            'payWithSamsungPay',
+            function ($requestMerchantLogin) use ($merchantLogin) {
+                $this->assertEquals($merchantLogin, $requestMerchantLogin);
+                return true;
+            },
+            ['data' => ['orderId' => '123']]
+        );
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $client->payWithSamsungPay('21vc1');
+    }
+
+    /**
+     * @test
+     * @dataProvider pay_with_samsung_pay_method_data_provider
+     */
+    public function pay_with_samsung_pay_method_saves_payments_to_db_and_returns_response(
+        string $merchant,
+        string $paymentToken,
+        array $params,
+        string $method,
+        array $headers,
+        array $apiResponse,
+        int $operationStatusId
+    ) {
+        Config::set('sberbank-acquiring.merchant_login', $merchant);
+
+        $this->mockApiClient(
+            'payWithSamsungPay',
+            function (
+                $requestMerchant,
+                $requestPaymentToken,
+                $requestParams,
+                $requestMethod,
+                $requestHeaders
+            ) use (
+                $merchant,
+                $paymentToken,
+                $params,
+                $method,
+                $headers
+            ) {
+                $this->assertEquals($merchant, $requestMerchant);
+                $this->assertEquals($paymentToken, $requestPaymentToken);
+                $this->assertEquals($params, $requestParams);
+                $this->assertEquals($method, $requestMethod);
+                $this->assertEquals($headers, $requestHeaders);
+                return true;
+            },
+            $apiResponse
+        );
+
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        /** @var Client $client */
+        $client = $this->app->make(Client::class);
+        $acquiringPayment = $client->payWithSamsungPay($paymentToken, $params, $method, $headers);
+
+        $this->assertInstanceOf(AcquiringPayment::class, $acquiringPayment);
+        $this->assertInstanceOf(SamsungPayPayment::class, $acquiringPayment->payment);
+        $this->assertInstanceOf(Collection::class, $acquiringPayment->operations);
+        $this->assertEquals(1, $acquiringPayment->operations->count());
+
+        $this->assertDatabaseHas($this->getTableName('payments'), [
+            'id' => $acquiringPayment->id,
+            'bank_order_id' => isset($apiResponse['data']) ? $apiResponse['data']['orderId'] : null,
+            'status_id' => $operationStatusId,
+            'system_id' => DictAcquiringPaymentSystem::SAMSUNG_PAY,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('samsung_pay_payments'), [
+            'order_number' => $params['orderNumber'] ?? null,
+            'description' => $params['description'] ?? null,
+            'language' => $params['language'] ?? null,
+            'additional_parameters' => isset($params['additionalParameters']) ? json_encode($params['additionalParameters']) : null,
+            'pre_auth' => $params['preAuth'] ?? null,
+            'payment_token' => $paymentToken,
+            'client_id' => $params['clientId'] ?? null,
+            'ip' => $params['ip'] ?? null,
+        ]);
+        $this->assertDatabaseHas($this->getTableName('payment_operations'), [
+            'payment_id' => $acquiringPayment->id,
+            'user_id' => $user->getKey(),
+            'type_id' => DictAcquiringPaymentOperationType::SAMSUNG_PAY_PAYMENT,
+            'request_json' => json_encode(array_merge(['paymentToken' => $paymentToken], $params)),
+            'response_json' => json_encode($apiResponse),
+        ]);
+    }
+
+    /**
+     * @test
+     */
     public function pay_with_apple_pay_method_throws_exception_when_cannot_update_payment_models_with_response()
     {
         $this->expectException(ResponseProcessingException::class);
@@ -1287,6 +1387,83 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'text/html'],
             ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+    }
+
+    public function pay_with_samsung_pay_method_data_provider()
+    {
+        yield [
+            'login_41vc1',
+            '10bcd-145bcx',
+            ['language' => 'RU'],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['data' => ['orderId' => 'vc81mvcx-0']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_g9m141-0vc',
+            '90vmvc2-51cv',
+            [],
+            HttpClientInterface::METHOD_POST,
+            [],
+            ['data' => ['orderId' => '0vc_123vc']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_1041',
+            '01pvc-14cvx1pq',
+            ['description' => 'order description', 'preAuth' => 'true'],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'application/json'],
+            ['data' => ['orderId' => 'v8123mvx01']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_v912mvc',
+            '91m990951m41vcx',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'true',
+                'language' => 'IT',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+                'clientId' => '123cx13478'
+            ],
+            HttpClientInterface::METHOD_POST,
+            ['content-type' => 'application/x-www-form-urlencoded'],
+            ['data' => ['orderId' => 'bv9134mbcx']],
+            DictAcquiringPaymentStatus::NEW,
+        ];
+        yield [
+            'login_123_abc',
+            '194c014245152mc',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'false',
+                'language' => 'RU',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+                'clientId' => '1vcs9421',
+                'ip' => '10.10.10.10',
+            ],
+            HttpClientInterface::METHOD_GET,
+            ['content-type' => 'text/html'],
+            ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
+            DictAcquiringPaymentStatus::ERROR,
+        ];
+        yield [
+            'login_812n3',
+            '0mcbv4145t0441_12314vc',
+            [
+                'description' => 'some order description',
+                'preAuth' => 'false',
+                'language' => 'DE',
+                'additionalParameters' => ['param_1' => 'value_1', 'param_2' => 'value_2'],
+                'ip' => '10.10.10.10',
+            ],
+            HttpClientInterface::METHOD_POST,
+            ['content-type' => 'application/x-www-form-urlencoded'],
+            ['error' => ['code' => 20, 'message' => 'unknown error occurred!']],
             DictAcquiringPaymentStatus::ERROR,
         ];
     }

@@ -431,16 +431,53 @@ class Client
     }
 
     /**
-     * @inheritDoc
+     * Запрос оплаты через Samsung Pay
+     *
+     * @param string $paymentToken Токен, полученный от системы Samsung Pay
+     * @param array $params        Необязательные параметры
+     * @param string $method       Тип HTTP-запроса
+     * @param array $headers       Хэдеры HTTP-клиента
+     *
+     * @return AcquiringPayment
+     *
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\HttpClientException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\NetworkException
+     * @throws Throwable
      */
     public function payWithSamsungPay(
-        string $merchant,
         string $paymentToken,
         array $params = [],
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
-    ): array {
-        // TODO: Implement payWithSamsungPay() method.
+    ): AcquiringPayment {
+        $payment = $this->paymentsFactory->createSamsungPayPayment();
+        $payment->fillWithSberbankParams($params);
+        $payment->setPaymentToken($paymentToken);
+        $payment->saveOrFail();
+
+        $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
+        $acquiringPayment->fill([
+            'system_id' => DictAcquiringPaymentSystem::SAMSUNG_PAY,
+            'status_id' => DictAcquiringPaymentStatus::NEW,
+        ]);
+        $acquiringPayment->payment()->associate($payment);
+        $acquiringPayment->saveOrFail();
+
+        $operation = $this->paymentsFactory->createPaymentOperation();
+        $operation->fill([
+            'user_id' => Auth::id(),
+            'type_id' => DictAcquiringPaymentOperationType::SAMSUNG_PAY_PAYMENT,
+            'request_json' => array_merge(['paymentToken' => $paymentToken], $params),
+        ]);
+        $operation->payment()->associate($acquiringPayment);
+        $operation->saveOrFail();
+
+        $merchantLogin = $this->getConfigParam('merchant_login');
+        $response = $this->apiClient->payWithSamsungPay($merchantLogin, $paymentToken, $params, $method, $headers);
+
+        return $this->processResponse($response, $acquiringPayment, $operation);
     }
 
     /**
