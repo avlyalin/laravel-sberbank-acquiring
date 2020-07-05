@@ -73,4 +73,19 @@ class SamsungPayPaymentTest extends TestCase
         $this->assertNotEmpty($payment->payment_token);
         $this->assertArrayNotHasKey('payment_token', $payment->toArray());
     }
+
+    /**
+     * @test
+     */
+    public function it_can_get_and_set_payment_token()
+    {
+        $payment = new SamsungPayPayment();
+        $token = $payment->getPaymentToken();
+        $this->assertNull($token);
+
+        $token = 'token-string';
+        $payment->setPaymentToken($token);
+
+        $this->assertEquals($token, $payment->getPaymentToken());
+    }
 }

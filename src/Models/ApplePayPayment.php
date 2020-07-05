@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-class ApplePayPayment extends BasePaymentModel
+use Avlyalin\SberbankAcquiring\Interfaces\HasPaymentToken as HasPaymentTokenInterface;
+use Avlyalin\SberbankAcquiring\Traits\HasPaymentToken;
+
+class ApplePayPayment extends BasePaymentModel implements HasPaymentTokenInterface
 {
+    use HasPaymentToken;
+
     protected $tableNameKey = 'apple_pay_payments';
 
     public $timestamps = false;
