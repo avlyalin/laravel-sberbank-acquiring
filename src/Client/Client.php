@@ -77,6 +77,7 @@ class Client
      *
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\AcquiringException
      * @throws \InvalidArgumentException
      * @throws Throwable
      */
@@ -107,6 +108,7 @@ class Client
      *
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\AcquiringException
      * @throws \InvalidArgumentException
      * @throws Throwable
      */
@@ -589,6 +591,7 @@ class Client
      *
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\JsonException
      * @throws \Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\AcquiringException
      * @throws \InvalidArgumentException
      * @throws Throwable
      */
