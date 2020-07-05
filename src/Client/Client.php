@@ -599,10 +599,13 @@ class Client
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
     ): AcquiringPayment {
-        $returnUrl = $params['returnUrl'] ?? $this->getConfigParam('params.return_url');
+        $returnUrl = $this->getReturnUrl($params);
         unset($params['returnUrl']);
 
-        $params['failUrl'] = $params['failUrl'] ?? $this->getConfigParam('params.fail_url');
+        $failUrl = $this->getFailUrl($params);
+        if (!is_null($failUrl)) {
+            $params['failUrl'] = $failUrl;
+        }
 
         $requestData = array_merge(['amount' => $amount, 'returnUrl' => $returnUrl], $params);
 
@@ -732,5 +735,37 @@ class Client
         }
 
         return $acquiringPayment;
+    }
+
+    /**
+     * Возвращает параметр returnUrl
+     *
+     * @param array $params
+     *
+     * @return string|null
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\AcquiringException
+     */
+    private function getReturnUrl(array $params): string
+    {
+        return $params['returnUrl'] ?? $this->getConfigParam('params.return_url');
+    }
+
+    /**
+     * Возвращает параметр failUrl
+     *
+     * @param array $params
+     *
+     * @return string|null
+     * @throws \Avlyalin\SberbankAcquiring\Exceptions\AcquiringException
+     */
+    private function getFailUrl(array $params): ?string
+    {
+        $configFailUrl = $this->getConfigParam('params.fail_url');
+        if (isset($params['failUrl'])) {
+            return $params['failUrl'];
+        } elseif (!empty($configFailUrl)) {
+            return $configFailUrl;
+        }
+        return null;
     }
 }
