@@ -244,4 +244,16 @@ class SberbankResponseTest extends TestCase
 
         $this->assertEquals(true, $response->isOk());
     }
+
+    /**
+     * @test
+     */
+    public function is_ok_method_returns_operation_status_5()
+    {
+        $response = new SberbankResponse(
+            '{"orderId": "bnv74","formUrl":"http://some-url.com"}'
+        );
+
+        $this->assertEquals(true, $response->isOk());
+    }
 }
