@@ -32,5 +32,11 @@ composer:
 phpunit:
 	$(APP) ./vendor/bin/phpunit $(args)
 
+phpunit-coverage-html:
+	$(APP) ./vendor/bin/phpunit --coverage-html ./.coverage_html
+
+phpunit-coverage-clover:
+	$(APP) ./vendor/bin/phpunit --coverage-clover=coverage.xml
+
 phpcs:
 	$(APP) ./vendor/bin/phpcs
