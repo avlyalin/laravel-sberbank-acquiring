@@ -37,7 +37,7 @@ abstract class BasePaymentModel extends BaseModel
         $attributes = [];
         foreach ($sberbankParams as $param => $value) {
             if (isset($this->acquiringParamsMap[$param]) === false) {
-                throw new \InvalidArgumentException("Param $param not found in \$sberbankParamsMap");
+                throw new \InvalidArgumentException("Param $param not found in \$acquiringParamsMap");
             }
             $attribute = $this->acquiringParamsMap[$param];
             $attributes[$attribute] = $value;

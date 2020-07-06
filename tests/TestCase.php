@@ -12,6 +12,7 @@ use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as Orchestra;
+use ReflectionClass;
 
 class TestCase extends Orchestra
 {
@@ -115,5 +116,20 @@ class TestCase extends Orchestra
         $operation = \Mockery::mock(AcquiringPaymentOperation::class . "[$method]");
         $operation->shouldReceive($method)->andReturn($returnValue);
         return $operation;
+    }
+
+    /**
+     * Записывает значение в свойство объекта
+     *
+     * @param $object
+     * @param $property
+     * @param $value
+     */
+    public function setProtectedProperty($object, $property, $value)
+    {
+        $reflection = new ReflectionClass($object);
+        $reflection_property = $reflection->getProperty($property);
+        $reflection_property->setAccessible(true);
+        $reflection_property->setValue($object, $value);
     }
 }
