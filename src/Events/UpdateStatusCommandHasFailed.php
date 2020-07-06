@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Events;
 
-use Avlyalin\SberbankAcquiring\Traits\PaymentEvent;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -15,7 +14,6 @@ class UpdateStatusCommandHasFailed extends Event
     use Dispatchable;
     use InteractsWithSockets;
     use SerializesModels;
-    use PaymentEvent;
 
     /**
      * @var array
