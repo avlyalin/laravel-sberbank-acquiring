@@ -125,7 +125,7 @@ class TestCase extends Orchestra
      * @param $property
      * @param $value
      */
-    public function setProtectedProperty($object, $property, $value)
+    protected function setProtectedProperty($object, $property, $value)
     {
         $reflection = new ReflectionClass($object);
         $reflection_property = $reflection->getProperty($property);
