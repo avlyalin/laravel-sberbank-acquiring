@@ -9,6 +9,7 @@ use Avlyalin\SberbankAcquiring\Client\Curl\Curl;
 use Avlyalin\SberbankAcquiring\Client\Curl\CurlInterface;
 use Avlyalin\SberbankAcquiring\Client\HttpClient;
 use Avlyalin\SberbankAcquiring\Client\HttpClientInterface;
+use Avlyalin\SberbankAcquiring\Commands\UpdateStatusCommand;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
@@ -37,6 +38,8 @@ class AcquiringServiceProvider extends ServiceProvider
         $this->registerBindings();
 
         $this->registerEloquentFactories();
+
+        $this->registerCommands();
     }
 
     /**
@@ -83,5 +86,14 @@ class AcquiringServiceProvider extends ServiceProvider
             return new DictAcquiringPaymentStatusRepository(new DictAcquiringPaymentStatus());
         });
         $this->app->bind(Client::class, Client::class);
+    }
+
+    private function registerCommands()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                UpdateStatusCommand::class,
+            ]);
+        }
     }
 }
