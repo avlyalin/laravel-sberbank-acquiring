@@ -34,14 +34,14 @@ class CreateAcquiringPaymentOperationsTable extends Migration
                 $table->timestamps();
 
                 $table->foreign('payment_id', "{$paymentsTableName}_payment_id_foreign")
-                    ->references($paymentsTableName)
-                    ->on('id')
+                    ->references('id')
+                    ->on($paymentsTableName)
                     ->onUpdate('cascade')
                     ->onDelete('cascade');
 
                 $table->foreign('type_id', "{$operationTypesTableName}_operation_type_id_foreign")
-                    ->references($operationTypesTableName)
-                    ->on('id')
+                    ->references('id')
+                    ->on($operationTypesTableName)
                     ->onUpdate('cascade')
                     ->onDelete('restrict');
             }
