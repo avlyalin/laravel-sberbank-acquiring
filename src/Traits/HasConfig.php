@@ -17,7 +17,7 @@ trait HasConfig
      */
     public function getTableName(string $tableNameKey): string
     {
-        return $this->getConfigParam("table_names.$tableNameKey");
+        return $this->getConfigParam("tables.$tableNameKey");
     }
 
     /**

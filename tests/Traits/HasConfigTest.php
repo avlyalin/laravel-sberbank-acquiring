@@ -15,7 +15,7 @@ class HasConfigTest extends TestCase
     public function should_return_table_name_for_correct_table_name_key()
     {
         $expectedTableName = 'some_payments_table';
-        Config::set('sberbank-acquiring.table_names.payment', $expectedTableName);
+        Config::set('sberbank-acquiring.tables.payment', $expectedTableName);
 
         $mock = $this->getMockForHasConfigTrait();
 
@@ -28,7 +28,7 @@ class HasConfigTest extends TestCase
     public function should_throw_exception_for_bad_table_name_key()
     {
         $expectedTableName = 'some_payments_table';
-        Config::set('sberbank-acquiring.table_names.bad_key', $expectedTableName);
+        Config::set('sberbank-acquiring.tables.bad_key', $expectedTableName);
 
         $mock = $this->getMockForHasConfigTrait();
 

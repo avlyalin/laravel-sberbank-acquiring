@@ -1,24 +1,9 @@
 <?php
 
 return [
-    'user' => [
-        'model' => \App\User::class,
-        'table' => 'users',
-        'primary_key' => 'id'
-    ],
-
-    'table_names' => [
-        'payments' => 'acquiring_payments',
-        'payment_operations' => 'acquiring_payment_operations',
-        'dict_payment_statuses' => 'dict_acquiring_payment_statuses',
-        'dict_payment_operation_types' => 'dict_acquiring_payment_operation_types',
-        'dict_payment_systems' => 'dict_acquiring_payment_systems',
-        'sberbank_payments' => 'acquiring_sberbank_payments',
-        'apple_pay_payments' => 'acquiring_apple_pay_payments',
-        'samsung_pay_payments' => 'acquiring_samsung_pay_payments',
-        'google_pay_payments' => 'acquiring_google_pay_payments',
-    ],
-
+    /**
+     * Авторизационные данные
+     */
     'auth' => [
         'userName' => env('SBERBANK_USERNAME', ''),
         'password' => env('SBERBANK_PASSWORD', ''),
@@ -30,16 +15,82 @@ return [
      */
     'merchant_login' => env('SBERBANK_MERCHANT_LOGIN', ''),
 
-    'baseUri' => env('SBERBANK_URI', ''),
+    /**
+     * Адрес сервера Сбербанка
+     */
+    'base_uri' => env('SBERBANK_URI', 'https://3dsec.sberbank.ru'),
 
+    /**
+     * Дополнительные параметры
+     */
     'params' => [
+        /**
+         * URL для перехода в случае успешной регистрации заказа
+         */
         'return_url' => env('SBERBANK_RETURN_URL', ''),
+
+        /**
+         * URL для перехода в случае неуспешной регистрации заказа
+         */
         'fail_url' => env('SBERBANK_FAIL_URL', ''),
     ],
-//
-//    'order_number' => [
-//        'generate' => true,
-//        'strategy' => \Avlyalin\SberbankAcquiring\Helpers\OrderNumberGenerator::class,
-//        'prefix' => env('SBERBANK_ORDER_PREFIX'),
-//    ],
+
+    /**
+     * Настройки модели пользователя
+     */
+    'user' => [
+        'model' => \App\User::class,
+        'table' => 'users',
+        'primary_key' => 'id',
+    ],
+
+    /**
+     * Названия таблиц ('ключ' => 'название')
+     */
+    'tables' => [
+        /**
+         * Базовая таблица платежей
+         */
+        'payments' => 'acquiring_payments',
+
+        /**
+         * Операции по платежам
+         */
+        'payment_operations' => 'acquiring_payment_operations',
+
+        /**
+         * Платежи напрямую через систему Сбербанка
+         */
+        'sberbank_payments' => 'acquiring_sberbank_payments',
+
+        /**
+         * Платежи через Apple Pay
+         */
+        'apple_pay_payments' => 'acquiring_apple_pay_payments',
+
+        /**
+         * Платежи через Samsung Pay
+         */
+        'samsung_pay_payments' => 'acquiring_samsung_pay_payments',
+
+        /**
+         * Платежи через Google Pay
+         */
+        'google_pay_payments' => 'acquiring_google_pay_payments',
+
+        /**
+         * Статусы платежей
+         */
+        'dict_payment_statuses' => 'dict_acquiring_payment_statuses',
+
+        /**
+         * Типы операций
+         */
+        'dict_payment_operation_types' => 'dict_acquiring_payment_operation_types',
+
+        /**
+         * Типы платежных систем
+         */
+        'dict_payment_systems' => 'dict_acquiring_payment_systems',
+    ],
 ];
