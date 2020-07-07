@@ -27,7 +27,8 @@ class CreateDictAcquiringPaymentStatusesTable extends Migration
             $table->date('end_date')->default('9999-12-31')->comment('Дата окончания действия справочного значения');
             $table->string('name')->comment('Имя статуса');
             $table->string('full_name')->comment('Полное имя статуса');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
         });
 
         DB::table($tableName)->insert(

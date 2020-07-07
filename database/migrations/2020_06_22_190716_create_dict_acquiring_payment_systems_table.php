@@ -26,7 +26,8 @@ class CreateDictAcquiringPaymentSystemsTable extends Migration
             $table->date('end_date')->default('9999-12-31')->comment('Дата окончания действия справочного значения');
             $table->string('name')->comment('Имя системы');
             $table->string('full_name')->comment('Полное имя системы');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
         });
 
         DB::table($tableName)->insert(
