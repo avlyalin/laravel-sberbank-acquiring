@@ -613,20 +613,24 @@ class Client
             $headers
         );
 
-        /** @var SberbankResponse $responseData */
         $responseData = $response->getResponseArray();
 
         $errorMessage = '';
-        $paymentSaved = $payment->update(['bank_form_url' => $responseData['formUrl']]);
-        if (!$paymentSaved) {
-            $errorMessage .= 'Error updating SberbankPayment. ';
+
+        if ($response->isOk()) {
+            $acquiringPaymentSaved = $acquiringPayment->update([
+                'bank_order_id' => $responseData['orderId'],
+                'status_id' => DictAcquiringPaymentStatus::REGISTERED,
+            ]);
+
+            $paymentSaved = $payment->update(['bank_form_url' => $responseData['formUrl']]);
+            if (!$paymentSaved) {
+                $errorMessage .= 'Error updating SberbankPayment. ';
+            }
+        } else {
+            $acquiringPaymentSaved = $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
         }
 
-        $acquiringPaymentSaved = $acquiringPayment->update([
-            'bank_order_id' => $responseData['orderId'],
-            'status_id' => $response->isOk() ? DictAcquiringPaymentStatus::REGISTERED
-                : DictAcquiringPaymentStatus::ERROR,
-        ]);
         if (!$acquiringPaymentSaved) {
             $errorMessage .= 'Error updating AcquiringPayment. ';
         }

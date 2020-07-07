@@ -157,7 +157,7 @@ class ClientTest extends TestCase
         $this->assertEquals(1, $operations->count());
 
         $this->assertDatabaseHas($this->getTableName('payments'), [
-            'bank_order_id' => $apiResponse['orderId'],
+            'bank_order_id' => $apiResponse['orderId'] ?? null,
             'status_id' => $operationStatusId,
             'system_id' => DictAcquiringPaymentSystem::SBERBANK,
         ]);
@@ -175,7 +175,7 @@ class ClientTest extends TestCase
             'session_timeout_secs' => $params['sessionTimeoutSecs'],
             'expiration_date' => $params['expirationDate'],
             'features' => $params['features'],
-            'bank_form_url' => $apiResponse['formUrl'],
+            'bank_form_url' => $apiResponse['formUrl'] ?? null,
         ]);
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
@@ -261,7 +261,7 @@ class ClientTest extends TestCase
         $this->assertEquals(1, $acquiringPayment->operations->count());
 
         $this->assertDatabaseHas($this->getTableName('payments'), [
-            'bank_order_id' => $apiResponse['orderId'],
+            'bank_order_id' => $apiResponse['orderId'] ?? null,
             'status_id' => $operationStatusId,
             'system_id' => DictAcquiringPaymentSystem::SBERBANK,
         ]);
@@ -279,7 +279,7 @@ class ClientTest extends TestCase
             'session_timeout_secs' => $params['sessionTimeoutSecs'],
             'expiration_date' => $params['expirationDate'],
             'features' => $params['features'],
-            'bank_form_url' => $apiResponse['formUrl'],
+            'bank_form_url' => $apiResponse['formUrl'] ?? null,
         ]);
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
@@ -1314,7 +1314,7 @@ class ClientTest extends TestCase
         ], [
             'token' => 'test_token',
         ],
-            ['errorCode' => 10, 'orderId' => '5vc013cx', 'formUrl' => 'http://pay.test.test/bver4'],
+            ['errorCode' => 10, 'errorMessage' => 'system error'],
             DictAcquiringPaymentStatus::ERROR,
         ];
     }
