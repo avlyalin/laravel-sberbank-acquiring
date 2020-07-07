@@ -48,7 +48,7 @@ class CreateAcquiringSberbankPaymentsTable extends Migration
      */
     public function down()
     {
-        $tableName = $this->getTableName('payments');
+        $tableName = $this->getTableName('sberbank_payments');
         Schema::dropIfExists($tableName);
     }
 }
