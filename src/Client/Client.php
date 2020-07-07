@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Client;
 
-use Avlyalin\SberbankAcquiring\Exceptions\HttpClientException;
-use Avlyalin\SberbankAcquiring\Exceptions\JsonException;
-use Avlyalin\SberbankAcquiring\Exceptions\NetworkException;
 use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperation;
 use Avlyalin\SberbankAcquiring\Repositories\DictAcquiringPaymentStatusRepository;
@@ -18,10 +15,7 @@ use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 use Throwable;
 
 class Client
