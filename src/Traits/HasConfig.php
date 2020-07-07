@@ -43,6 +43,17 @@ trait HasConfig
     }
 
     /**
+     * Возвращает адрес сервера Сбербанка
+     *
+     * @return string
+     * @throws Exception
+     */
+    public function getConfigBaseURIParam(): string
+    {
+        return $this->getConfigParam('base_uri');
+    }
+
+    /**
      * @param string $key
      *
      * @return Repository|Application|mixed
@@ -53,7 +64,7 @@ trait HasConfig
         $value = config("sberbank-acquiring.$key");
         if (is_null($value)) {
             throw new AcquiringException(
-                "Error: cannot find key \"$key\" in config/sberbank-acquiring.php. Config may not be loaded."
+                "Error: cannot find key \"$key\" in config/sberbank-acquiring.php. Config could not be loaded."
             );
         }
         return $value;

@@ -52,6 +52,8 @@ class Client
      * @param PaymentsFactory $paymentsFactory
      * @param AcquiringPaymentRepository $acquiringPaymentRepository
      * @param DictAcquiringPaymentStatusRepository $acquiringPaymentStatusRepository
+     *
+     * @throws Exception
      */
     public function __construct(
         ApiClientInterface $apiClient,
@@ -63,6 +65,7 @@ class Client
         $this->paymentsFactory = $paymentsFactory;
         $this->acquiringPaymentRepository = $acquiringPaymentRepository;
         $this->acquiringPaymentStatusRepository = $acquiringPaymentStatusRepository;
+        $this->apiClient->setBaseUri($this->getConfigBaseURIParam());
     }
 
     /**

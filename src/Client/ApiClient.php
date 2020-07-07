@@ -355,6 +355,14 @@ class ApiClient implements ApiClientInterface
     }
 
     /**
+     * @param string $baseUri
+     */
+    public function setBaseUri(string $baseUri): void
+    {
+        $this->baseUri = $baseUri;
+    }
+
+    /**
      * Формирует абсолютный URI
      *
      * @param string $pathName Относительный путь

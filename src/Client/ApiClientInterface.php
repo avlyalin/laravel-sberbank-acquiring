@@ -405,4 +405,11 @@ interface ApiClientInterface
         string $method = HttpClientInterface::METHOD_POST,
         array $headers = []
     ): SberbankResponse;
+
+    /**
+     * Устанавливает адрес сервера
+     *
+     * @param string $baseUri
+     */
+    public function setBaseUri(string $baseUri): void;
 }

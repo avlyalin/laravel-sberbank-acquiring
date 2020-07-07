@@ -67,6 +67,19 @@ class HasConfigTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function should_return_base_uri_param()
+    {
+        $baseUri = 'http://pay-server.test';
+        Config::set('sberbank-acquiring.base_uri', $baseUri);
+
+        $mock = $this->getMockForHasConfigTrait();
+
+        $this->assertEquals($baseUri, $mock->getConfigBaseURIParam());
+    }
+
+    /**
      * @return \PHPUnit\Framework\MockObject\MockObject|HasConfig
      */
     private function getMockForHasConfigTrait()

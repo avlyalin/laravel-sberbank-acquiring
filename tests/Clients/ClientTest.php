@@ -38,6 +38,21 @@ class ClientTest extends TestCase
 
     /**
      * @test
+     */
+    public function it_sets_api_clients_base_uri()
+    {
+        $baseUri = 'https://pay-base-uri.test';
+        Config::set('sberbank-acquiring.base_uri', $baseUri);
+
+        $apiClient = \Mockery::mock(ApiClient::class);
+        $apiClient->shouldReceive('setBaseUri')->with($baseUri)->atLeast()->once();
+        $this->app->instance(ApiClientInterface::class, $apiClient);
+
+        $this->app->make(Client::class);
+    }
+
+    /**
+     * @test
      * @dataProvider auth_params_data_provider
      */
     public function register_method_uses_auth_params_from_config($authParams)
@@ -1207,7 +1222,7 @@ class ClientTest extends TestCase
                 'paymentToken' => $paymentToken,
                 'amount' => $amount,
                 'returnUrl' => $returnUrl,
-                ], $params)),
+            ], $params)),
             'response_json' => json_encode($apiResponse),
         ]);
     }
