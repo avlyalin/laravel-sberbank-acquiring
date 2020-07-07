@@ -1,5 +1,5 @@
 {
-    "name": "avlyalin/sberbank-acquiring",
+    "name": "avlyalin/laravel-sberbank-acquiring",
     "description": "Provides functionality to interoperate with Sberbank acquiring system",
     "type": "library",
     "license": "MIT",
