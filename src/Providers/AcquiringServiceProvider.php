@@ -52,6 +52,7 @@ class AcquiringServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../../config/sberbank-acquiring.php' => config_path('sberbank-acquiring.php'),
         ], 'config');
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
     }
 
     /**
