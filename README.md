@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/avlyalin/laravel-sberbank-acquiring/branch/master/graph/badge.svg)](https://codecov.io/gh/avlyalin/laravel-sberbank-acquiring)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
-Пакет предоставляет вашему приложению функционал для работы с платежами с использованием эквайринга от Сбербанка.
+Пакет предоставляет вашему приложению функциональность для работы с платежами с использованием эквайринга от Сбербанка.
 Возможности:
 - Создание и хранение платежей
 - Логирование операций по платежам
