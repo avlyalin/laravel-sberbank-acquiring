@@ -443,7 +443,7 @@ if ($response->isOk) {
 Задать данные можно либо отредактировав файл конфигурации, либо указав их в `.env`:
 ```dotenv
 SBERBANK_USERNAME=your_username
-SBERBANK_USERNAME=your_password
+SBERBANK_PASSWORD=your_password
 SBERBANK_TOKEN=your_token
 SBERBANK_MERCHANT_LOGIN=your_merchant_login
 ```
