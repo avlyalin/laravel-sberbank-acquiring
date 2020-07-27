@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 $factory->define(GooglePayPayment::class, function (Faker $faker) {
     return [
-        'order_number' => Str::random(36),
+        'order_number' => Str::random(32),
         'description' => $faker->sentence,
         'language' => $faker->languageCode,
         'additional_parameters' => json_encode([$faker->word => $faker->word, $faker->word => $faker->word]),
