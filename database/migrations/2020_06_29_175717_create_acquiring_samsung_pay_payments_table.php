@@ -31,6 +31,7 @@ class CreateAcquiringSamsungPayPaymentsTable extends Migration
             $table->string('client_id', 255)->nullable()->comment('Номер (идентификатор) клиента в системе продавца');
             $table->string('ip', 39)->nullable()->comment('IP-адрес покупателя');
             $table->text('payment_token')->comment('Токен, полученный от Samsung Pay');
+            $table->string('currency_code', 3)->nullable()->comment('Цифровой код валюты платежа ISO 4217');
         });
     }
 

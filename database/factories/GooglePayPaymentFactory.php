@@ -17,7 +17,7 @@ $factory->define(GooglePayPayment::class, function (Faker $faker) {
         'client_id' => Str::random(30),
         'ip' => $faker->ipv6,
         'amount' => $faker->numberBetween(),
-        'currency_code' => $faker->currencyCode,
+        'currency_code' => (string)$faker->numberBetween(100, 999),
         'email' => $faker->email,
         'phone' => $faker->phoneNumber,
         'return_url' => $faker->url,

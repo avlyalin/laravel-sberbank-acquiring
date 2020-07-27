@@ -27,6 +27,7 @@ class SamsungPayPayment extends BasePaymentModel implements HasPaymentTokenInter
         'pre_auth',
         'client_id',
         'ip',
+        'currency_code',
     ];
 
     protected $casts = [
@@ -41,5 +42,6 @@ class SamsungPayPayment extends BasePaymentModel implements HasPaymentTokenInter
         'preAuth' => 'pre_auth',
         'clientId' => 'client_id',
         'ip' => 'ip',
+        'currencyCode' => 'currency_code',
     ];
 }

@@ -11,7 +11,7 @@ $factory->define(SberbankPayment::class, function (Faker $faker) {
     return [
         'order_number' => Str::random(32),
         'amount' => $faker->numberBetween(),
-        'currency' => $faker->currencyCode,
+        'currency' => $faker->numberBetween(100, 999),
         'return_url' => $faker->url,
         'fail_url' => $faker->url,
         'description' => $faker->sentence,

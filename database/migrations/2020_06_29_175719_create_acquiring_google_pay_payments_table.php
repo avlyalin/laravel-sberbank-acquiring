@@ -31,7 +31,7 @@ class CreateAcquiringGooglePayPaymentsTable extends Migration
             $table->string('client_id', 255)->nullable()->comment('Номер (идентификатор) клиента в системе продавца');
             $table->string('ip', 39)->nullable()->comment('IP-адрес покупателя');
             $table->unsignedBigInteger('amount')->unsigned()->comment('Сумма платежа в минимальных единицах валюты');
-            $table->unsignedSmallInteger('currency_code')->nullable()->comment('Цифровой код валюты платежа ISO 4217');
+            $table->string('currency_code')->nullable()->comment('Цифровой код валюты платежа ISO 4217');
             $table->string('email')->nullable()->comment('Адрес электронной почты покупателя');
             $table->string('phone')->nullable()->comment('Номер телефона покупателя');
             $table->string('return_url', 512)->comment('Адрес для перехода в случае успешной оплаты');
