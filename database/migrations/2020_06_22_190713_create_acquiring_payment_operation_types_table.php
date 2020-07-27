@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-class CreateDictAcquiringPaymentOperationTypesTable extends Migration
+class CreateAcquiringPaymentOperationTypesTable extends Migration
 {
     use HasConfig;
 
@@ -18,14 +18,13 @@ class CreateDictAcquiringPaymentOperationTypesTable extends Migration
      */
     public function up()
     {
-        $tableName = $this->getTableName('dict_payment_operation_types');
+        $tableName = $this->getTableName('payment_operation_types');
 
         Schema::create($tableName, function (Blueprint $table) {
             $table->increments('id');
-            $table->date('begin_date')->default('1800-01-01')->comment('Дата начала действия справочного значения');
-            $table->date('end_date')->default('9999-12-31')->comment('Дата окончания действия справочного значения');
             $table->string('name')->comment('Название операции');
             $table->string('full_name')->comment('Полное название операции');
+            $table->boolean('is_active')->default(1)->comment('Флаг действия справочного значения');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
         });
@@ -60,7 +59,7 @@ class CreateDictAcquiringPaymentOperationTypesTable extends Migration
      */
     public function down()
     {
-        $tableName = $this->getTableName('dict_payment_operation_types');
+        $tableName = $this->getTableName('payment_operation_types');
         Schema::dropIfExists($tableName);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-class DictAcquiringPaymentOperationType extends BaseModel
+class AcquiringPaymentOperationType extends BaseModel
 {
     /**
      * Регистрация заказа
@@ -116,5 +116,5 @@ class DictAcquiringPaymentOperationType extends BaseModel
      */
     public const VERIFY_ENROLLMENT = 16;
 
-    protected $tableNameKey = 'dict_payment_operation_types';
+    protected $tableNameKey = 'payment_operation_types';
 }

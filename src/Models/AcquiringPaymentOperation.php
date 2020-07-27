@@ -54,6 +54,6 @@ class AcquiringPaymentOperation extends BaseModel
      */
     public function type(): BelongsTo
     {
-        return $this->belongsTo(DictAcquiringPaymentOperationType::class, 'type_id', 'id');
+        return $this->belongsTo(AcquiringPaymentOperationType::class, 'type_id', 'id');
     }
 }

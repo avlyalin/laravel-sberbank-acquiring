@@ -2,7 +2,7 @@
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-class DictAcquiringPaymentStatus extends BaseModel
+class AcquiringPaymentStatus extends BaseModel
 {
     /**
      * Новый
@@ -66,5 +66,5 @@ class DictAcquiringPaymentStatus extends BaseModel
      */
     public const ERROR = 9;
 
-    protected $tableNameKey = 'dict_payment_statuses';
+    protected $tableNameKey = 'payment_statuses';
 }

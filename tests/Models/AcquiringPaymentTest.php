@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Avlyalin\SberbankAcquiring\Tests\Models;
 
 use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentSystem;
 use Avlyalin\SberbankAcquiring\Models\GooglePayPayment;
 use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
 use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
@@ -33,7 +33,7 @@ class AcquiringPaymentTest extends TestCase
     {
         $acquiringPayment = $this->createAcquiringPayment();
 
-        $this->assertInstanceOf(DictAcquiringPaymentSystem::class, $acquiringPayment->system);
+        $this->assertInstanceOf(AcquiringPaymentSystem::class, $acquiringPayment->system);
     }
 
     /**
@@ -43,7 +43,7 @@ class AcquiringPaymentTest extends TestCase
     {
         $acquiringPayment = $this->createAcquiringPayment();
 
-        $this->assertInstanceOf(DictAcquiringPaymentStatus::class, $acquiringPayment->status);
+        $this->assertInstanceOf(AcquiringPaymentStatus::class, $acquiringPayment->status);
     }
 
     /**

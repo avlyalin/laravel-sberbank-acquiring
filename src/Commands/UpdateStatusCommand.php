@@ -6,7 +6,7 @@ namespace Avlyalin\SberbankAcquiring\Commands;
 
 use Avlyalin\SberbankAcquiring\Client\Client;
 use Avlyalin\SberbankAcquiring\Events\UpdateStatusCommandHasFailed;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
 use Illuminate\Console\Command;
 
@@ -16,10 +16,10 @@ class UpdateStatusCommand extends Command
      * Статусы по-умолчанию
      */
     public const STATUSES = [
-        DictAcquiringPaymentStatus::NEW,
-        DictAcquiringPaymentStatus::REGISTERED,
-        DictAcquiringPaymentStatus::HELD,
-        DictAcquiringPaymentStatus::ACS_AUTH,
+        AcquiringPaymentStatus::NEW,
+        AcquiringPaymentStatus::REGISTERED,
+        AcquiringPaymentStatus::HELD,
+        AcquiringPaymentStatus::ACS_AUTH,
     ];
 
     /**

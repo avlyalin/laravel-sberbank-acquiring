@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Repositories;
 
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class DictAcquiringPaymentStatusRepository extends BaseRepository
+class AcquiringPaymentStatusRepository extends BaseRepository
 {
 
     /**
-     * DictAcquiringPaymentStatus constructor.
+     * AcquiringPaymentStatus constructor.
      *
-     * @param DictAcquiringPaymentStatus $acquiringPaymentStatus
+     * @param AcquiringPaymentStatus $acquiringPaymentStatus
      */
-    public function __construct(DictAcquiringPaymentStatus $acquiringPaymentStatus)
+    public function __construct(AcquiringPaymentStatus $acquiringPaymentStatus)
     {
         parent::__construct($acquiringPaymentStatus);
     }

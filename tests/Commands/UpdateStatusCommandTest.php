@@ -7,7 +7,7 @@ namespace Avlyalin\SberbankAcquiring\Tests\Commands;
 use Avlyalin\SberbankAcquiring\Client\Client;
 use Avlyalin\SberbankAcquiring\Commands\UpdateStatusCommand;
 use Avlyalin\SberbankAcquiring\Events\UpdateStatusCommandHasFailed;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,9 +28,9 @@ class UpdateStatusCommandTest extends TestCase
     public function it_can_use_custom_statuses()
     {
         $statuses = [
-            DictAcquiringPaymentStatus::AUTH_DECLINED,
-            DictAcquiringPaymentStatus::REVERSED,
-            DictAcquiringPaymentStatus::REFUNDED,
+            AcquiringPaymentStatus::AUTH_DECLINED,
+            AcquiringPaymentStatus::REVERSED,
+            AcquiringPaymentStatus::REFUNDED,
         ];
         $this->mockAcquiringPaymentRepository('getByStatus', $statuses, new Collection());
         $this->mockClient();
@@ -54,9 +54,9 @@ class UpdateStatusCommandTest extends TestCase
      */
     public function it_updates_payments_statuses()
     {
-        $payment1 = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::NEW]);
-        $payment2 = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::REVERSED]);
-        $payment3 = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::REGISTERED]);
+        $payment1 = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::NEW]);
+        $payment2 = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::REVERSED]);
+        $payment3 = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::REGISTERED]);
 
         $client = \Mockery::mock(Client::class)->makePartial();
         $client->shouldReceive('getOrderStatusExtended')->once()->with($payment1->id);
@@ -72,9 +72,9 @@ class UpdateStatusCommandTest extends TestCase
      */
     public function it_should_fail_and_emit_event_when_get_order_status_throws_exception()
     {
-        $payment1 = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::NEW]);
-        $payment2 = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::REFUNDED]);
-        $payment3 = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::ACS_AUTH]);
+        $payment1 = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::NEW]);
+        $payment2 = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::REFUNDED]);
+        $payment3 = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::ACS_AUTH]);
 
         $client = \Mockery::mock(Client::class)->makePartial();
         $client->shouldReceive('getOrderStatusExtended')->once()->with($payment1->id);

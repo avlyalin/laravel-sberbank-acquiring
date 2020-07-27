@@ -81,16 +81,16 @@ return [
         /**
          * Статусы платежей
          */
-        'dict_payment_statuses' => 'dict_acquiring_payment_statuses',
+        'payment_statuses' => 'acquiring_payment_statuses',
 
         /**
          * Типы операций
          */
-        'dict_payment_operation_types' => 'dict_acquiring_payment_operation_types',
+        'payment_operation_types' => 'acquiring_payment_operation_types',
 
         /**
          * Типы платежных систем
          */
-        'dict_payment_systems' => 'dict_acquiring_payment_systems',
+        'payment_systems' => 'acquiring_payment_systems',
     ],
 ];

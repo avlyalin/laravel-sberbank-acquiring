@@ -14,9 +14,9 @@ use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Helpers\Currency;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
 use Avlyalin\SberbankAcquiring\Models\ApplePayPayment;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperationType;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentSystem;
 use Avlyalin\SberbankAcquiring\Models\GooglePayPayment;
 use Avlyalin\SberbankAcquiring\Models\SamsungPayPayment;
 use Avlyalin\SberbankAcquiring\Models\SberbankPayment;
@@ -159,7 +159,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payments'), [
             'bank_order_id' => $apiResponse['orderId'] ?? null,
             'status_id' => $operationStatusId,
-            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
+            'system_id' => AcquiringPaymentSystem::SBERBANK,
         ]);
         $this->assertDatabaseHas($this->getTableName('sberbank_payments'), [
             'order_number' => $params['orderNumber'],
@@ -180,7 +180,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::REGISTER,
+            'type_id' => AcquiringPaymentOperationType::REGISTER,
             'request_json' => json_encode(array_merge(['amount' => $amount], $requestParams)),
             'response_json' => json_encode($apiResponse),
         ]);
@@ -263,7 +263,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payments'), [
             'bank_order_id' => $apiResponse['orderId'] ?? null,
             'status_id' => $operationStatusId,
-            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
+            'system_id' => AcquiringPaymentSystem::SBERBANK,
         ]);
         $this->assertDatabaseHas($this->getTableName('sberbank_payments'), [
             'order_number' => $params['orderNumber'],
@@ -284,7 +284,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::REGISTER_PRE_AUTH,
+            'type_id' => AcquiringPaymentOperationType::REGISTER_PRE_AUTH,
             'request_json' => json_encode(array_merge(['amount' => $amount], $requestParams)),
             'response_json' => json_encode($apiResponse),
         ]);
@@ -373,7 +373,7 @@ class ClientTest extends TestCase
         $this->setAuthParams($authParams);
         $expectedParams = array_merge($authParams, $params);
 
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::REGISTERED]);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::REGISTERED]);
 
         $this->mockApiClient('deposit', function (
             $requestPaymentId,
@@ -412,7 +412,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::DEPOSIT,
+            'type_id' => AcquiringPaymentOperationType::DEPOSIT,
             'request_json' => json_encode(array_merge([
                 'orderId' => $acquiringPayment->bank_order_id,
                 'amount' => $amount,
@@ -503,7 +503,7 @@ class ClientTest extends TestCase
         $this->setAuthParams($authParams);
         $expectedParams = array_merge($authParams, $params);
 
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::CONFIRMED]);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::CONFIRMED]);
 
         $this->mockApiClient('reverse', function (
             $requestPaymentId,
@@ -539,7 +539,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::REVERSE,
+            'type_id' => AcquiringPaymentOperationType::REVERSE,
             'request_json' => json_encode(array_merge(['orderId' => $acquiringPayment->bank_order_id], $params)),
             'response_json' => json_encode($response),
         ]);
@@ -628,7 +628,7 @@ class ClientTest extends TestCase
         $this->setAuthParams($authParams);
         $expectedParams = array_merge($authParams, $params);
 
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::CONFIRMED]);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::CONFIRMED]);
 
         $this->mockApiClient('refund', function (
             $requestPaymentId,
@@ -667,7 +667,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::REFUND,
+            'type_id' => AcquiringPaymentOperationType::REFUND,
             'request_json' => json_encode(array_merge([
                 'orderId' => $acquiringPayment->bank_order_id,
                 'amount' => $amount,
@@ -762,7 +762,7 @@ class ClientTest extends TestCase
 
         /** @var Client $client */
         $client = $this->app->make(Client::class);
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::NEW]);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::NEW]);
         $client->getOrderStatusExtended($acquiringPayment->id);
     }
 
@@ -780,7 +780,7 @@ class ClientTest extends TestCase
     ) {
         $this->setAuthParams($authParams);
 
-        $acquiringPayment = $this->createAcquiringPayment(['status_id' => DictAcquiringPaymentStatus::NEW]);
+        $acquiringPayment = $this->createAcquiringPayment(['status_id' => AcquiringPaymentStatus::NEW]);
 
         $expectedParams = array_merge(['orderId' => $acquiringPayment->bank_order_id], $authParams, $params);
 
@@ -811,12 +811,12 @@ class ClientTest extends TestCase
             'id' => $acquiringPayment->id,
             'status_id' => $newPaymentStatusId,
             'bank_order_id' => $acquiringPayment->bank_order_id,
-            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
+            'system_id' => AcquiringPaymentSystem::SBERBANK,
         ]);
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::GET_EXTENDED_STATUS,
+            'type_id' => AcquiringPaymentOperationType::GET_EXTENDED_STATUS,
             'request_json' => json_encode(array_merge(['orderId' => $acquiringPayment->bank_order_id], $params)),
             'response_json' => json_encode($response),
         ]);
@@ -900,7 +900,7 @@ class ClientTest extends TestCase
             'id' => $acquiringPayment->id,
             'bank_order_id' => isset($apiResponse['data']) ? $apiResponse['data']['orderId'] : null,
             'status_id' => $operationStatusId,
-            'system_id' => DictAcquiringPaymentSystem::APPLE_PAY,
+            'system_id' => AcquiringPaymentSystem::APPLE_PAY,
         ]);
         $this->assertDatabaseHas($this->getTableName('apple_pay_payments'), [
             'order_number' => $params['orderNumber'] ?? null,
@@ -913,7 +913,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::APPLE_PAY_PAYMENT,
+            'type_id' => AcquiringPaymentOperationType::APPLE_PAY_PAYMENT,
             'request_json' => json_encode(array_merge(['paymentToken' => $paymentToken], $params)),
             'response_json' => json_encode($apiResponse),
         ]);
@@ -1028,7 +1028,7 @@ class ClientTest extends TestCase
             'id' => $acquiringPayment->id,
             'bank_order_id' => isset($apiResponse['data']) ? $apiResponse['data']['orderId'] : null,
             'status_id' => $operationStatusId,
-            'system_id' => DictAcquiringPaymentSystem::SAMSUNG_PAY,
+            'system_id' => AcquiringPaymentSystem::SAMSUNG_PAY,
         ]);
         $this->assertDatabaseHas($this->getTableName('samsung_pay_payments'), [
             'order_number' => $params['orderNumber'] ?? null,
@@ -1043,7 +1043,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::SAMSUNG_PAY_PAYMENT,
+            'type_id' => AcquiringPaymentOperationType::SAMSUNG_PAY_PAYMENT,
             'request_json' => json_encode(array_merge(['paymentToken' => $paymentToken], $params)),
             'response_json' => json_encode($apiResponse),
         ]);
@@ -1196,7 +1196,7 @@ class ClientTest extends TestCase
             'id' => $acquiringPayment->id,
             'bank_order_id' => isset($apiResponse['data']) ? $apiResponse['data']['orderId'] : null,
             'status_id' => $operationStatusId,
-            'system_id' => DictAcquiringPaymentSystem::GOOGLE_PAY,
+            'system_id' => AcquiringPaymentSystem::GOOGLE_PAY,
         ]);
         $this->assertDatabaseHas($this->getTableName('google_pay_payments'), [
             'order_number' => $params['orderNumber'] ?? null,
@@ -1217,7 +1217,7 @@ class ClientTest extends TestCase
         $this->assertDatabaseHas($this->getTableName('payment_operations'), [
             'payment_id' => $acquiringPayment->id,
             'user_id' => $user->getKey(),
-            'type_id' => DictAcquiringPaymentOperationType::GOOGLE_PAY_PAYMENT,
+            'type_id' => AcquiringPaymentOperationType::GOOGLE_PAY_PAYMENT,
             'request_json' => json_encode(array_merge([
                 'paymentToken' => $paymentToken,
                 'amount' => $amount,
@@ -1277,7 +1277,7 @@ class ClientTest extends TestCase
             'password' => 'test_password',
         ],
             ['errorCode' => 0, 'orderId' => '1234vs41', 'formUrl' => 'http://pay.test.test/58vcnx'],
-            DictAcquiringPaymentStatus::REGISTERED,
+            AcquiringPaymentStatus::REGISTERED,
         ];
 
         yield [1000, 'http://pay.test.com/pay', [
@@ -1296,7 +1296,7 @@ class ClientTest extends TestCase
             'token' => 'test_token',
         ],
             ['errorCode' => 0, 'orderId' => '5vc013cx', 'formUrl' => 'http://pay.test.test/17nvcd'],
-            DictAcquiringPaymentStatus::REGISTERED,
+            AcquiringPaymentStatus::REGISTERED,
         ];
 
         yield [1000, 'http://pay.test/test-pay', [
@@ -1315,7 +1315,7 @@ class ClientTest extends TestCase
             'token' => 'test_token',
         ],
             ['errorCode' => 10, 'errorMessage' => 'system error'],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 
@@ -1334,7 +1334,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-1' => 'header-1-value'],
             ['errorCode' => 0],
-            DictAcquiringPaymentStatus::REGISTERED,
+            AcquiringPaymentStatus::REGISTERED,
         ];
         yield [
             2000,
@@ -1343,7 +1343,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-2' => 'header-2-value'],
             ['error' => ['code' => 0, 'message' => 'success']],
-            DictAcquiringPaymentStatus::REGISTERED,
+            AcquiringPaymentStatus::REGISTERED,
         ];
         yield [
             3000,
@@ -1352,7 +1352,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success']],
-            DictAcquiringPaymentStatus::REGISTERED,
+            AcquiringPaymentStatus::REGISTERED,
         ];
         yield [
             3000,
@@ -1361,7 +1361,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
         yield [
             3000,
@@ -1370,7 +1370,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 10, 'message' => 'success']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 
@@ -1382,7 +1382,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-1' => 'header-1-value'],
             ['errorCode' => 0],
-            DictAcquiringPaymentStatus::REVERSED,
+            AcquiringPaymentStatus::REVERSED,
         ];
         yield [
             [],
@@ -1390,7 +1390,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-2' => 'header-2-value'],
             ['error' => ['code' => 0, 'message' => 'success']],
-            DictAcquiringPaymentStatus::REVERSED,
+            AcquiringPaymentStatus::REVERSED,
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
@@ -1398,7 +1398,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success']],
-            DictAcquiringPaymentStatus::REVERSED,
+            AcquiringPaymentStatus::REVERSED,
         ];
         yield [
             [],
@@ -1406,7 +1406,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
         yield [
             [],
@@ -1414,7 +1414,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 10, 'message' => 'success']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 
@@ -1427,7 +1427,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-1' => 'header-1-value'],
             ['errorCode' => 0],
-            DictAcquiringPaymentStatus::CONFIRMED,
+            AcquiringPaymentStatus::CONFIRMED,
         ];
         yield [
             1005,
@@ -1436,7 +1436,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-2' => 'header-2-value'],
             ['error' => ['code' => 0, 'message' => 'success']],
-            DictAcquiringPaymentStatus::CONFIRMED,
+            AcquiringPaymentStatus::CONFIRMED,
         ];
         yield [
             2100,
@@ -1445,7 +1445,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success']],
-            DictAcquiringPaymentStatus::CONFIRMED,
+            AcquiringPaymentStatus::CONFIRMED,
         ];
         yield [
             3200,
@@ -1454,7 +1454,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
         yield [
             5010,
@@ -1463,7 +1463,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 10, 'message' => 'success']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 
@@ -1475,7 +1475,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-1' => 'header-1-value'],
             ['errorCode' => 0, 'orderStatus' => 0],
-            DictAcquiringPaymentStatus::REGISTERED,
+            AcquiringPaymentStatus::REGISTERED,
         ];
         yield [
             [],
@@ -1483,7 +1483,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['header-2' => 'header-2-value'],
             ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 1],
-            DictAcquiringPaymentStatus::HELD,
+            AcquiringPaymentStatus::HELD,
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
@@ -1491,7 +1491,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 2],
-            DictAcquiringPaymentStatus::CONFIRMED,
+            AcquiringPaymentStatus::CONFIRMED,
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
@@ -1499,7 +1499,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 3],
-            DictAcquiringPaymentStatus::REVERSED,
+            AcquiringPaymentStatus::REVERSED,
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
@@ -1507,7 +1507,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 4],
-            DictAcquiringPaymentStatus::REFUNDED,
+            AcquiringPaymentStatus::REFUNDED,
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
@@ -1515,7 +1515,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 5],
-            DictAcquiringPaymentStatus::ACS_AUTH,
+            AcquiringPaymentStatus::ACS_AUTH,
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
@@ -1523,7 +1523,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 0, 'message' => 'success'], 'orderStatus' => 6],
-            DictAcquiringPaymentStatus::AUTH_DECLINED,
+            AcquiringPaymentStatus::AUTH_DECLINED,
         ];
         yield [
             ['language' => 'EN', 'additional_param' => 'value'],
@@ -1531,7 +1531,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['error' => ['code' => 10]],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
         yield [
             ['language' => 'EN'],
@@ -1539,7 +1539,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['errorCode' => 10, 'errorMessage' => 'error occurred!'],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 
@@ -1552,7 +1552,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['data' => ['orderId' => 'np-qe_41sjkg']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_123',
@@ -1561,7 +1561,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['data' => ['orderId' => '1cx031vc14']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_123_abc',
@@ -1570,7 +1570,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'text/plain'],
             ['data' => ['orderId' => '1cx031vc14']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_123_abc',
@@ -1584,7 +1584,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'text/html'],
             ['data' => ['orderId' => 'bvc914mvcx']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_123_abc',
@@ -1598,7 +1598,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'text/html'],
             ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
         yield [
             'login_123_abc',
@@ -1612,7 +1612,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'text/html'],
             ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 
@@ -1625,7 +1625,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['data' => ['orderId' => 'vc81mvcx-0']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_g9m141-0vc',
@@ -1634,7 +1634,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['data' => ['orderId' => '0vc_123vc']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_1041',
@@ -1643,7 +1643,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'application/json'],
             ['data' => ['orderId' => 'v8123mvx01']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_v912mvc',
@@ -1658,7 +1658,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['content-type' => 'application/x-www-form-urlencoded'],
             ['data' => ['orderId' => 'bv9134mbcx']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_123_abc',
@@ -1674,7 +1674,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'text/html'],
             ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
         yield [
             'login_812n3',
@@ -1689,7 +1689,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['content-type' => 'application/x-www-form-urlencoded'],
             ['error' => ['code' => 20, 'message' => 'unknown error occurred!']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 
@@ -1704,7 +1704,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             [],
             ['data' => ['orderId' => 'v9xcm13vc']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_g9m141-0vc',
@@ -1715,7 +1715,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             [],
             ['data' => ['orderId' => '9vck14vc']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_1041',
@@ -1732,7 +1732,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'application/json'],
             ['data' => ['orderId' => 'vc9143vc']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_v813vcxz',
@@ -1750,7 +1750,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['content-type' => 'application/x-www-form-urlencoded'],
             ['data' => ['orderId' => 'vcx09123x']],
-            DictAcquiringPaymentStatus::NEW,
+            AcquiringPaymentStatus::NEW,
         ];
         yield [
             'login_123_abc',
@@ -1772,7 +1772,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_GET,
             ['content-type' => 'text/html'],
             ['error' => ['code' => 10, 'message' => 'unknown error occured!']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
         yield [
             'login_bc9814cvx',
@@ -1794,7 +1794,7 @@ class ClientTest extends TestCase
             HttpClientInterface::METHOD_POST,
             ['content-type' => 'application/x-www-form-urlencoded'],
             ['error' => ['code' => 20, 'message' => 'unknown error occurred!']],
-            DictAcquiringPaymentStatus::ERROR,
+            AcquiringPaymentStatus::ERROR,
         ];
     }
 

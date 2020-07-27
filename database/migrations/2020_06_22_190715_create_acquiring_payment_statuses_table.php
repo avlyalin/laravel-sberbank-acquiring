@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-class CreateDictAcquiringPaymentStatusesTable extends Migration
+class CreateAcquiringPaymentStatusesTable extends Migration
 {
     use HasConfig;
 
@@ -18,15 +18,14 @@ class CreateDictAcquiringPaymentStatusesTable extends Migration
      */
     public function up()
     {
-        $tableName = $this->getTableName('dict_payment_statuses');
+        $tableName = $this->getTableName('payment_statuses');
 
         Schema::create($tableName, function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('bank_id')->nullable()->unique()->comment('id статуса в системе банка');
-            $table->date('begin_date')->default('1800-01-01')->comment('Дата начала действия справочного значения');
-            $table->date('end_date')->default('9999-12-31')->comment('Дата окончания действия справочного значения');
             $table->string('name')->comment('Имя статуса');
             $table->string('full_name')->comment('Полное имя статуса');
+            $table->boolean('is_active')->default(1)->comment('Флаг действия справочного значения');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
         });
@@ -54,7 +53,7 @@ class CreateDictAcquiringPaymentStatusesTable extends Migration
      */
     public function down()
     {
-        $tableName = $this->getTableName('dict_payment_statuses');
+        $tableName = $this->getTableName('payment_statuses');
         Schema::dropIfExists($tableName);
     }
 }

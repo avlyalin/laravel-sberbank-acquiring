@@ -12,9 +12,9 @@ use Avlyalin\SberbankAcquiring\Client\HttpClientInterface;
 use Avlyalin\SberbankAcquiring\Commands\UpdateStatusCommand;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
-use Avlyalin\SberbankAcquiring\Repositories\DictAcquiringPaymentStatusRepository;
+use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentStatusRepository;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\ServiceProvider;
 
@@ -83,8 +83,8 @@ class AcquiringServiceProvider extends ServiceProvider
         $this->app->singleton(AcquiringPaymentRepository::class, function ($app) {
             return new AcquiringPaymentRepository(new AcquiringPayment());
         });
-        $this->app->singleton(DictAcquiringPaymentStatusRepository::class, function ($app) {
-            return new DictAcquiringPaymentStatusRepository(new DictAcquiringPaymentStatus());
+        $this->app->singleton(AcquiringPaymentStatusRepository::class, function ($app) {
+            return new AcquiringPaymentStatusRepository(new AcquiringPaymentStatus());
         });
         $this->app->bind(Client::class, Client::class);
     }

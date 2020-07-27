@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Avlyalin\SberbankAcquiring\Tests\Models;
 
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperationType;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 
 class AcquiringPaymentOperationTest extends TestCase
@@ -39,6 +39,6 @@ class AcquiringPaymentOperationTest extends TestCase
     {
         $acquiringPaymentOperation = $this->createAcquiringPaymentOperation();
 
-        $this->assertInstanceOf(DictAcquiringPaymentOperationType::class, $acquiringPaymentOperation->type);
+        $this->assertInstanceOf(AcquiringPaymentOperationType::class, $acquiringPaymentOperation->type);
     }
 }

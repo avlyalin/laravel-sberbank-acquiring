@@ -52,9 +52,9 @@ php artisan migrate
 * **acquiring_apple_pay_payments** - платежи через Apple Pay
 * **acquiring_samsung_pay_payments** - платежи через Samsung Pay
 * **acquiring_google_pay_payments** - платежи через Google Pay
-* **dict_acquiring_payment_statuses** - справочник статусов платежей
-* **dict_acquiring_payment_operation_types** - справочник типов операций
-* **dict_acquiring_payment_systems** - справочник платежных систем
+* **acquiring_payment_statuses** - справочник статусов платежей
+* **acquiring_payment_operation_types** - справочник типов операций
+* **acquiring_payment_systems** - справочник платежных систем
 
 Диаграмма:
 ![screenshot of conversion](./diagram.png)
@@ -461,14 +461,14 @@ php artisan sberbank-acquiring:update-statuses --id=1 --id=7
 Рекомендуется добавить команду в шедулер (**app/Console/Kernel.php**):
 ```php
     use Avlyalin\SberbankAcquiring\Commands\UpdateStatusCommand;
-    use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
+    use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
 
     protected function schedule(Schedule $schedule)
     {
         $schedule->command(UpdateStatusCommand::class, [
             '--id' => [
-                DictAcquiringPaymentStatus::NEW,
-                DictAcquiringPaymentStatus::ACS_AUTH,
+                AcquiringPaymentStatus::NEW,
+                AcquiringPaymentStatus::ACS_AUTH,
             ],
         ])->everyMinute();
     }

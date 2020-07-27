@@ -20,7 +20,7 @@ class CreateAcquiringPaymentOperationsTable extends Migration
     {
         $tableName = $this->getTableName('payment_operations');
         $paymentsTableName = $this->getTableName('payments');
-        $operationTypesTableName = $this->getTableName('dict_payment_operation_types');
+        $operationTypesTableName = $this->getTableName('payment_operation_types');
 
         Schema::create(
             $tableName,
@@ -58,7 +58,7 @@ class CreateAcquiringPaymentOperationsTable extends Migration
     {
         $tableName = $this->getTableName('payment_operations');
         $paymentsTableName = $this->getTableName('payments');
-        $operationTypesTableName = $this->getTableName('dict_payment_operation_types');
+        $operationTypesTableName = $this->getTableName('payment_operation_types');
 
         if (DB::getDriverName() !== 'sqlite') {
             Schema::table(

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Models;
 
-class DictAcquiringPaymentSystem extends BaseModel
+class AcquiringPaymentSystem extends BaseModel
 {
     /**
      * Сбербанк
@@ -34,5 +34,5 @@ class DictAcquiringPaymentSystem extends BaseModel
      */
     public const GOOGLE_PAY = 4;
 
-    protected $tableNameKey = 'dict_payment_systems';
+    protected $tableNameKey = 'payment_systems';
 }

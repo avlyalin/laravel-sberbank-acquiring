@@ -19,8 +19,8 @@ class CreateAcquiringPaymentsTable extends Migration
     public function up()
     {
         $tableName = $this->getTableName('payments');
-        $statusesTableName = $this->getTableName('dict_payment_statuses');
-        $systemsTableName = $this->getTableName('dict_payment_systems');
+        $statusesTableName = $this->getTableName('payment_statuses');
+        $systemsTableName = $this->getTableName('payment_systems');
 
         Schema::create($tableName, function (Blueprint $table) use ($tableName, $statusesTableName, $systemsTableName) {
             $table->bigIncrements('id');

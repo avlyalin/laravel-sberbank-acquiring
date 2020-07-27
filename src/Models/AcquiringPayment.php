@@ -37,7 +37,7 @@ class AcquiringPayment extends BaseModel
      */
     public function system(): BelongsTo
     {
-        return $this->belongsTo(DictAcquiringPaymentSystem::class, 'system_id', 'id');
+        return $this->belongsTo(AcquiringPaymentSystem::class, 'system_id', 'id');
     }
 
     /**
@@ -47,7 +47,7 @@ class AcquiringPayment extends BaseModel
      */
     public function status(): BelongsTo
     {
-        return $this->belongsTo(DictAcquiringPaymentStatus::class, 'status_id', 'id');
+        return $this->belongsTo(AcquiringPaymentStatus::class, 'status_id', 'id');
     }
 
     /**

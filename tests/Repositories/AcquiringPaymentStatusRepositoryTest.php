@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace Avlyalin\SberbankAcquiring\Tests\Repositories;
 
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
-use Avlyalin\SberbankAcquiring\Repositories\DictAcquiringPaymentStatusRepository;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentStatusRepository;
 use Avlyalin\SberbankAcquiring\Tests\TestCase;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class DictAcquiringPaymentStatusRepositoryTest extends TestCase
+class AcquiringPaymentStatusRepositoryTest extends TestCase
 {
     /**
-     * @var DictAcquiringPaymentStatusRepository
+     * @var AcquiringPaymentStatusRepository
      */
     private $repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = $this->app->make(DictAcquiringPaymentStatusRepository::class);
+        $this->repository = $this->app->make(AcquiringPaymentStatusRepository::class);
     }
 
     /**
@@ -28,10 +28,10 @@ class DictAcquiringPaymentStatusRepositoryTest extends TestCase
     public function find_method_returns_model()
     {
         $columns = ['id', 'full_name'];
-        $model = $this->repository->find(DictAcquiringPaymentStatus::REGISTERED, $columns);
+        $model = $this->repository->find(AcquiringPaymentStatus::REGISTERED, $columns);
 
-        $this->assertInstanceOf(DictAcquiringPaymentStatus::class, $model);
-        $this->assertEquals(DictAcquiringPaymentStatus::REGISTERED, $model->id);
+        $this->assertInstanceOf(AcquiringPaymentStatus::class, $model);
+        $this->assertEquals(AcquiringPaymentStatus::REGISTERED, $model->id);
         $this->assertCount(2, $model->getAttributes());
         $this->assertEquals($columns, array_keys($model->getAttributes()));
     }
@@ -42,10 +42,10 @@ class DictAcquiringPaymentStatusRepositoryTest extends TestCase
     public function find_or_fail_method_returns_model()
     {
         $columns = ['id', 'name', 'created_at'];
-        $model = $this->repository->findOrFail(DictAcquiringPaymentStatus::REVERSED, $columns);
+        $model = $this->repository->findOrFail(AcquiringPaymentStatus::REVERSED, $columns);
 
-        $this->assertInstanceOf(DictAcquiringPaymentStatus::class, $model);
-        $this->assertEquals(DictAcquiringPaymentStatus::REVERSED, $model->id);
+        $this->assertInstanceOf(AcquiringPaymentStatus::class, $model);
+        $this->assertEquals(AcquiringPaymentStatus::REVERSED, $model->id);
         $this->assertCount(3, $model->getAttributes());
         $this->assertEquals($columns, array_keys($model->getAttributes()));
     }
@@ -70,8 +70,8 @@ class DictAcquiringPaymentStatusRepositoryTest extends TestCase
         $columns = ['id', 'name', 'full_name', 'created_at'];
         $model = $this->repository->findByBankId($held, $columns);
 
-        $this->assertInstanceOf(DictAcquiringPaymentStatus::class, $model);
-        $this->assertEquals(DictAcquiringPaymentStatus::HELD, $model->id);
+        $this->assertInstanceOf(AcquiringPaymentStatus::class, $model);
+        $this->assertEquals(AcquiringPaymentStatus::HELD, $model->id);
         $this->assertCount(4, $model->getAttributes());
         $this->assertEquals($columns, array_keys($model->getAttributes()));
     }

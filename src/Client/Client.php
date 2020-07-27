@@ -6,13 +6,13 @@ namespace Avlyalin\SberbankAcquiring\Client;
 
 use Avlyalin\SberbankAcquiring\Exceptions\ResponseProcessingException;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperation;
-use Avlyalin\SberbankAcquiring\Repositories\DictAcquiringPaymentStatusRepository;
+use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentStatusRepository;
 use Avlyalin\SberbankAcquiring\Traits\HasConfig;
 use Avlyalin\SberbankAcquiring\Factories\PaymentsFactory;
 use Avlyalin\SberbankAcquiring\Models\AcquiringPayment;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentOperationType;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentStatus;
-use Avlyalin\SberbankAcquiring\Models\DictAcquiringPaymentSystem;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentOperationType;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentStatus;
+use Avlyalin\SberbankAcquiring\Models\AcquiringPaymentSystem;
 use Avlyalin\SberbankAcquiring\Repositories\AcquiringPaymentRepository;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +35,7 @@ class Client
      */
     private $acquiringPaymentRepository;
     /**
-     * @var DictAcquiringPaymentStatusRepository
+     * @var AcquiringPaymentStatusRepository
      */
     private $acquiringPaymentStatusRepository;
 
@@ -45,7 +45,7 @@ class Client
      * @param ApiClientInterface $apiClient
      * @param PaymentsFactory $paymentsFactory
      * @param AcquiringPaymentRepository $acquiringPaymentRepository
-     * @param DictAcquiringPaymentStatusRepository $acquiringPaymentStatusRepository
+     * @param AcquiringPaymentStatusRepository $acquiringPaymentStatusRepository
      *
      * @throws Exception
      */
@@ -53,7 +53,7 @@ class Client
         ApiClientInterface $apiClient,
         PaymentsFactory $paymentsFactory,
         AcquiringPaymentRepository $acquiringPaymentRepository,
-        DictAcquiringPaymentStatusRepository $acquiringPaymentStatusRepository
+        AcquiringPaymentStatusRepository $acquiringPaymentStatusRepository
     ) {
         $this->apiClient = $apiClient;
         $this->paymentsFactory = $paymentsFactory;
@@ -85,7 +85,7 @@ class Client
         array $headers = []
     ): AcquiringPayment {
         return $this->performRegister(
-            DictAcquiringPaymentOperationType::REGISTER,
+            AcquiringPaymentOperationType::REGISTER,
             $amount,
             $params,
             $method,
@@ -116,7 +116,7 @@ class Client
         array $headers = []
     ): AcquiringPayment {
         return $this->performRegister(
-            DictAcquiringPaymentOperationType::REGISTER_PRE_AUTH,
+            AcquiringPaymentOperationType::REGISTER_PRE_AUTH,
             $amount,
             $params,
             $method,
@@ -157,7 +157,7 @@ class Client
         $operation->fill([
             'payment_id' => $acquiringPayment->id,
             'user_id' => Auth::id(),
-            'type_id' => DictAcquiringPaymentOperationType::DEPOSIT,
+            'type_id' => AcquiringPaymentOperationType::DEPOSIT,
             'request_json' => array_merge([
                 'orderId' => $acquiringPayment->bank_order_id,
                 'amount' => $amount,
@@ -174,7 +174,7 @@ class Client
         );
 
         if ($response->isOk() === false) {
-            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+            $acquiringPayment->update(['status_id' => AcquiringPaymentStatus::ERROR]);
         }
 
         $operationSaved = $operation->update([
@@ -220,7 +220,7 @@ class Client
         $operation->fill([
             'payment_id' => $acquiringPayment->id,
             'user_id' => Auth::id(),
-            'type_id' => DictAcquiringPaymentOperationType::REVERSE,
+            'type_id' => AcquiringPaymentOperationType::REVERSE,
             'request_json' => array_merge(['orderId' => $acquiringPayment->bank_order_id], $params),
         ]);
         $operation->saveOrFail();
@@ -233,9 +233,9 @@ class Client
         );
 
         if ($response->isOk()) {
-            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::REVERSED]);
+            $acquiringPayment->update(['status_id' => AcquiringPaymentStatus::REVERSED]);
         } else {
-            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+            $acquiringPayment->update(['status_id' => AcquiringPaymentStatus::ERROR]);
         }
 
         $operationSaved = $operation->update([
@@ -282,7 +282,7 @@ class Client
         $operation->fill([
             'payment_id' => $acquiringPayment->id,
             'user_id' => Auth::id(),
-            'type_id' => DictAcquiringPaymentOperationType::REFUND,
+            'type_id' => AcquiringPaymentOperationType::REFUND,
             'request_json' => array_merge([
                 'orderId' => $acquiringPayment->bank_order_id,
                 'amount' => $amount,
@@ -299,7 +299,7 @@ class Client
         );
 
         if (!$response->isOk()) {
-            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+            $acquiringPayment->update(['status_id' => AcquiringPaymentStatus::ERROR]);
         }
 
         $operationSaved = $operation->update([
@@ -346,7 +346,7 @@ class Client
         $operation->fill([
             'payment_id' => $acquiringPayment->id,
             'user_id' => Auth::id(),
-            'type_id' => DictAcquiringPaymentOperationType::GET_EXTENDED_STATUS,
+            'type_id' => AcquiringPaymentOperationType::GET_EXTENDED_STATUS,
             'request_json' => $requestParams,
         ]);
         $operation->saveOrFail();
@@ -357,13 +357,13 @@ class Client
 
         if ($response->isOk()) {
             $bankStatusId = (int)$responseData['orderStatus'];
-            $dictOrderStatus = $this->acquiringPaymentStatusRepository->findByBankId($bankStatusId);
-            if (!$dictOrderStatus) {
+            $orderStatus = $this->acquiringPaymentStatusRepository->findByBankId($bankStatusId);
+            if (!$orderStatus) {
                 throw new ResponseProcessingException("Unknown \"orderStatus\" \"$bankStatusId\" found in response");
             }
-            $acquiringPayment->update(['status_id' => $dictOrderStatus->id]);
+            $acquiringPayment->update(['status_id' => $orderStatus->id]);
         } else {
-            $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+            $acquiringPayment->update(['status_id' => AcquiringPaymentStatus::ERROR]);
         }
 
         $operationSaved = $operation->update([
@@ -408,8 +408,8 @@ class Client
 
         $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
         $acquiringPayment->fill([
-            'system_id' => DictAcquiringPaymentSystem::APPLE_PAY,
-            'status_id' => DictAcquiringPaymentStatus::NEW,
+            'system_id' => AcquiringPaymentSystem::APPLE_PAY,
+            'status_id' => AcquiringPaymentStatus::NEW,
         ]);
         $acquiringPayment->payment()->associate($payment);
         $acquiringPayment->saveOrFail();
@@ -417,7 +417,7 @@ class Client
         $operation = $this->paymentsFactory->createPaymentOperation();
         $operation->fill([
             'user_id' => Auth::id(),
-            'type_id' => DictAcquiringPaymentOperationType::APPLE_PAY_PAYMENT,
+            'type_id' => AcquiringPaymentOperationType::APPLE_PAY_PAYMENT,
             'request_json' => array_merge(['paymentToken' => $paymentToken], $params),
         ]);
         $operation->payment()->associate($acquiringPayment);
@@ -458,8 +458,8 @@ class Client
 
         $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
         $acquiringPayment->fill([
-            'system_id' => DictAcquiringPaymentSystem::SAMSUNG_PAY,
-            'status_id' => DictAcquiringPaymentStatus::NEW,
+            'system_id' => AcquiringPaymentSystem::SAMSUNG_PAY,
+            'status_id' => AcquiringPaymentStatus::NEW,
         ]);
         $acquiringPayment->payment()->associate($payment);
         $acquiringPayment->saveOrFail();
@@ -467,7 +467,7 @@ class Client
         $operation = $this->paymentsFactory->createPaymentOperation();
         $operation->fill([
             'user_id' => Auth::id(),
-            'type_id' => DictAcquiringPaymentOperationType::SAMSUNG_PAY_PAYMENT,
+            'type_id' => AcquiringPaymentOperationType::SAMSUNG_PAY_PAYMENT,
             'request_json' => array_merge(['paymentToken' => $paymentToken], $params),
         ]);
         $operation->payment()->associate($acquiringPayment);
@@ -524,8 +524,8 @@ class Client
 
         $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
         $acquiringPayment->fill([
-            'system_id' => DictAcquiringPaymentSystem::GOOGLE_PAY,
-            'status_id' => DictAcquiringPaymentStatus::NEW,
+            'system_id' => AcquiringPaymentSystem::GOOGLE_PAY,
+            'status_id' => AcquiringPaymentStatus::NEW,
         ]);
         $acquiringPayment->payment()->associate($payment);
         $acquiringPayment->saveOrFail();
@@ -533,7 +533,7 @@ class Client
         $operation = $this->paymentsFactory->createPaymentOperation();
         $operation->fill([
             'user_id' => Auth::id(),
-            'type_id' => DictAcquiringPaymentOperationType::GOOGLE_PAY_PAYMENT,
+            'type_id' => AcquiringPaymentOperationType::GOOGLE_PAY_PAYMENT,
             'request_json' => array_merge(['paymentToken' => $paymentToken], $fillableParams),
         ]);
         $operation->payment()->associate($acquiringPayment);
@@ -590,8 +590,8 @@ class Client
 
         $acquiringPayment = $this->paymentsFactory->createAcquiringPayment();
         $acquiringPayment->fill([
-            'system_id' => DictAcquiringPaymentSystem::SBERBANK,
-            'status_id' => DictAcquiringPaymentStatus::NEW,
+            'system_id' => AcquiringPaymentSystem::SBERBANK,
+            'status_id' => AcquiringPaymentStatus::NEW,
         ]);
         $acquiringPayment->payment()->associate($payment);
         $acquiringPayment->saveOrFail();
@@ -620,7 +620,7 @@ class Client
         if ($response->isOk()) {
             $acquiringPaymentSaved = $acquiringPayment->update([
                 'bank_order_id' => $responseData['orderId'],
-                'status_id' => DictAcquiringPaymentStatus::REGISTERED,
+                'status_id' => AcquiringPaymentStatus::REGISTERED,
             ]);
 
             $paymentSaved = $payment->update(['bank_form_url' => $responseData['formUrl']]);
@@ -628,7 +628,7 @@ class Client
                 $errorMessage .= 'Error updating SberbankPayment. ';
             }
         } else {
-            $acquiringPaymentSaved = $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+            $acquiringPaymentSaved = $acquiringPayment->update(['status_id' => AcquiringPaymentStatus::ERROR]);
         }
 
         if (!$acquiringPaymentSaved) {
@@ -696,7 +696,7 @@ class Client
                 'bank_order_id' => $responseData['data']['orderId'],
             ]);
         } else {
-            $acquiringPaymentSaved = $acquiringPayment->update(['status_id' => DictAcquiringPaymentStatus::ERROR]);
+            $acquiringPaymentSaved = $acquiringPayment->update(['status_id' => AcquiringPaymentStatus::ERROR]);
         }
 
         if (!$acquiringPaymentSaved) {
